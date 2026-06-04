@@ -31,7 +31,7 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
         <div className='mobile-drawer-list'>
           {items.map(([k, l]) => <button key={k} className={`mobile-drawer-item ${page === k ? 'active' : ''}`} onClick={() => go(k)}>{l}</button>)}
         </div>
-        <div className='mobile-drawer-footer'>localhost:3001</div>
+        <div className='mobile-drawer-footer'>https://keygate-backend.onrender.com/</div>
       </aside>
     </div>
 
