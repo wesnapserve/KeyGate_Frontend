@@ -31,9 +31,9 @@ export default function DemoPage({ ctx }) {
   const preview = !selectedSubkey ? 'Select a subkey to see the request preview...' : `POST /v1/chat/completions\nAuthorization: Bearer ${tokenPreview || 'sk-kg-••••'}\n\n{\n  "model": "${model}",\n  "messages": [{\n    "role": "user",\n    "content": "${prompt}"\n  }]\n}`;
   const add = (line) => setConsoleLines((v) => [...v, line]);
 
-  const curlSnippet = `TOKEN="sk-kg-YourTokenHere"\ncurl https://keygate-backend.onrender.com/v1/chat/completions \\\n  -H "Authorization: Bearer $TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"${model}","messages":[{"role":"user","content":"${prompt}"}]}'`;
-  const jsSnippet = `fetch('https://keygate-backend.onrender.com/v1/chat/completions', {\n  method: 'POST',\n  headers: { Authorization: 'Bearer sk-kg-YourTokenHere', 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: '${model}', messages: [{ role: 'user', content: '${prompt}' }] })\n}).then(r => r.json()).then(console.log);`;
-  const pySnippet = `import requests\nres = requests.post('https://keygate-backend.onrender.com/v1/chat/completions',\n  headers={'Authorization':'Bearer sk-kg-YourTokenHere','Content-Type':'application/json'},\n  json={'model':'${model}','messages':[{'role':'user','content':'${prompt}'}]})\nprint(res.json())`;
+  const curlSnippet = `TOKEN="sk-kg-YourTokenHere"\ncurl http://localhost:3001/v1/chat/completions \\\n  -H "Authorization: Bearer $TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"${model}","messages":[{"role":"user","content":"${prompt}"}]}'`;
+  const jsSnippet = `fetch('http://localhost:3001/v1/chat/completions', {\n  method: 'POST',\n  headers: { Authorization: 'Bearer sk-kg-YourTokenHere', 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: '${model}', messages: [{ role: 'user', content: '${prompt}' }] })\n}).then(r => r.json()).then(console.log);`;
+  const pySnippet = `import requests\nres = requests.post('http://localhost:3001/v1/chat/completions',\n  headers={'Authorization':'Bearer sk-kg-YourTokenHere','Content-Type':'application/json'},\n  json={'model':'${model}','messages':[{'role':'user','content':'${prompt}'}]})\nprint(res.json())`;
 
   const runDemo = async () => {
     if (!selectedSubkey) return notify('Select a subkey first', 'error');
@@ -54,7 +54,7 @@ export default function DemoPage({ ctx }) {
 
   const snippetCard = (title, code) => <div className='card' onClick={() => copyText(code)} style={{ cursor: 'pointer' }}><div className='card-title'>{title}</div><pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'DM Mono, monospace', fontSize: '12px', marginTop: '8px' }}>{code}</pre></div>;
 
-  return <div className='page active demo-page'><div className='page-header'><div className='page-title'>Live demo</div><div className='page-sub'>See exactly how a client uses a subkey — without ever knowing the real key</div></div>
+  return <div className='page active demo-page'><div style={{ padding: '32px 36px' }}><div className='page-header'><div className='page-title'>Live demo</div><div className='page-sub'>See exactly how a client uses a subkey — without ever knowing the real key</div></div>
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
       <div className='card'><div className='card-header'><div className='card-title'>Configure test call</div></div>
         {!active.length && <div className='empty-text'>No active subkeys. <button className='btn btn-sm btn-ghost' onClick={()=>{ window.history.pushState({},'',window.location.pathname.replace('/demo','/subkeys')); window.dispatchEvent(new PopStateEvent('popstate')); }}>Create Subkey</button></div>}
@@ -67,5 +67,5 @@ export default function DemoPage({ ctx }) {
     </div>
     <div className='console'><div className='console-bar'><div className='dot r' /><div className='dot y' /><div className='dot g' /><span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '8px' }}>KeyGate proxy console</span></div><div className='console-body'>{consoleLines.map((l, i) => <p key={i} className='console-line'>{l}</p>)}</div></div>
     <div className='snippet-grid' style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>{snippetCard('Auto-generated JS snippet (click to copy)', jsSnippet)}{snippetCard('Auto-generated Python snippet (click to copy)', pySnippet)}{snippetCard('Auto-generated cURL snippet (click to copy)', curlSnippet)}</div>
-  </div>;
+  </div></div>;
 }

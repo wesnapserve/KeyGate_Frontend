@@ -15,7 +15,7 @@ export default function OverviewPage({ ctx, navigate }) {
   const prevFail = logs.slice(15, 30).filter((l) => l.status !== 'success').length || 1;
   const failTrend = Math.round(((logs.slice(0, 15).filter((l) => l.status !== 'success').length - prevFail) / prevFail) * 100);
 
-  return <div className='page active'>
+  return <div className='page active'><div style={{ padding: '32px 36px' }}>
     <div className='page-header'><div className='page-title'>Overview</div><div className='page-sub'>Observability dashboard for proxy usage</div></div>
 
     <div className='stats mobile-quick-stats'>
@@ -28,9 +28,7 @@ export default function OverviewPage({ ctx, navigate }) {
     <div className='card health-card'><div className='card-header'><div><div className='card-title'>Health & abuse detection</div><div className='card-sub'>Fast signal check before deep analytics</div></div><button className='btn btn-ghost btn-sm' onClick={() => navigate('logs')}>Inspect logs →</button></div>
       <div className='mobile-stack-grid' style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
         <div className='card' style={{ margin: 0, padding: '14px' }}><div className='card-sub'>Top user</div><div className='mono' style={{ fontSize: '13px', marginTop: '4px' }}>{topUser ? `${topUser[0]} — ${fmtNum(topUser[1])} tokens` : '—'}</div></div>
-        <div className='card' style={{ margin: 0, padding: '14px' }}><div className='card-sub'>Abuse detection</div><div style={{ marginTop: '4px', fontSize: '12px' }}>{failed > analytics.totalRequests * 0.35
-  ? <span style={{ color: 'var(--amber)', display: 'flex', alignItems: 'center', gap: 6 }}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" width="14" height="14"><path d="M8 2 1 14h14L8 2Z"/><path d="M8 6v3"/><path d="M8 11.5v.5"/></svg>High error ratio detected</span>
-  : <span style={{ color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 6 }}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="14" height="14"><path d="M3 8.5 6.5 12 13 5"/></svg>No suspicious activity</span>}</div></div>
+        <div className='card' style={{ margin: 0, padding: '14px' }}><div className='card-sub'>Abuse detection</div><div style={{ marginTop: '4px', fontSize: '12px' }}>{failed > analytics.totalRequests * 0.35 ? '⚠ High error ratio detected' : '✅ No suspicious activity'}</div></div>
       </div>
     </div>
 
@@ -53,5 +51,5 @@ export default function OverviewPage({ ctx, navigate }) {
         return <div key={sk.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '2px' }}>{sk.name}</div><div className='quota-bar'><div className={`quota-fill ${col}`} style={{ width: `${pct}%` }} /></div><div className='quota-text'>{fmtNum(sk.tokens_used)} / {fmtNum(sk.monthly_token_limit)} tokens — {pct}%</div></div><span className={`badge ${sk.status}`}>{sk.status}</span></div>;
       })}
     </div>
-  </div>;
+  </div></div>;
 }

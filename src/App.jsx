@@ -10,7 +10,7 @@ import DemoPage from './components/pages/DemoPage';
 import HealthPage from './components/pages/HealthPage';
 import NotificationsPage from './components/pages/NotificationsPage';
 
-const API = import.meta.env.VITE_API_URL || 'https://keygate-backend.onrender.com';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const fmtNum = (n) => (n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n || 0));
 const fmtTime = (ts) => (!ts ? '—' : new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
 const fmtDate = (ts) => (!ts ? 'Never' : new Date(ts * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }));
@@ -147,22 +147,7 @@ export default function App() {
   }
 
   if (view === 'create') {
-    return <div className='page active' style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-      <div className='card' style={{ maxWidth: 480, width: '100%', margin: '0 auto', padding: 32 }}>
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 40, height: 40, margin: '0 auto 12px' }}>
-            <path d="M12 2.5 3 6v5c0 5 3.5 9 9 10 5.5-1 9-5 9-10V6l-9-3.5Z"/>
-            <path d="M9 12.5 11 14.5 15 9.5"/>
-          </svg>
-          <div className='card-title' style={{ fontSize: 18 }}>Create your first project</div>
-          <div className='card-sub' style={{ marginTop: 6 }}>Projects are isolated workspaces for your API keys and usage data.</div>
-        </div>
-        <div className='field'><label>Project name</label><input value={projectName} onChange={(e) => setProjectName(e.target.value)} placeholder='e.g. Acme Production' autoFocus /></div>
-        <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8, lineHeight: 1.6 }}>Project slug is auto-generated. You can create up to <strong style={{ color: 'var(--text)' }}>3 projects</strong> on the Free plan.</div>
-        <div className='modal-footer' style={{ marginTop: 24 }}><button className='btn btn-primary' style={{ width: '100%', justifyContent: 'center', minHeight: 44 }} onClick={createProject} disabled={!projectName.trim()}>Create project</button></div>
-      </div>
-      <div className={`notif ${notif.show ? 'show' : ''} ${notif.type}`}>{notif.msg}</div>
-    </div>;
+    return <div className='page active'><div style={{ maxWidth: 620, margin: '60px auto' }}><div className='card'><div className='card-title' style={{ marginBottom: 10 }}>Create Project</div><div className='field'><label>Project Name</label><input value={projectName} onChange={(e)=>setProjectName(e.target.value)} placeholder='Acme Production' /></div><div style={{fontSize:12,color:'var(--muted)',marginTop:8}}>Project ID is auto-generated (example: project-m2zpicks).</div><div className='modal-footer'><button className='btn btn-primary' onClick={createProject}>Create Project</button></div></div></div><div className={`notif ${notif.show ? 'show' : ''} ${notif.type}`}>{notif.msg}</div></div>;
   }
 
   if (view === 'select' || !projectSlug) {
@@ -186,9 +171,7 @@ export default function App() {
         <div className={`card projects-banner console-info-banner ${showPlanBanner ? '' : 'hidden'}`}>
           <div className='console-banner-text'>Your Free plan includes up to 3 projects and limited resources.</div>
           <button className='btn btn-ghost btn-sm console-banner-link' style={{marginTop:8}}>Upgrade to Pro</button>
-          <button className='banner-close' onClick={() => setShowPlanBanner(false)} aria-label='Close banner'>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width="14" height="14"><path d="M4 4 12 12"/><path d="M12 4 4 12"/></svg>
-          </button>
+          <button className='banner-close' onClick={() => setShowPlanBanner(false)} aria-label='Close banner'>✕</button>
         </div>
 
         <div className='console-project-count'>Total: <strong>{projects.length} / 3</strong> projects</div>
@@ -231,8 +214,8 @@ export default function App() {
     </div>;
   }
 
-  return (
-    <div className='app-shell'>
+  return <>
+    <div className='app'>
       <ConsoleHeader
         page={page}
         selectedProject={selectedProject}
@@ -242,27 +225,25 @@ export default function App() {
         onOpenNotifications={() => navigate('notifications')}
         mobileMenuOpen={mobileMenuOpen}
       />
-      <div className='app-body'>
-        <Sidebar
-          page={page}
-          navigate={navigate}
-          onBackToConsole={() => go('/console')}
-          drawerOpen={mobileMenuOpen}
-          setDrawerOpen={setMobileMenuOpen}
-        />
-        <main className='main'>
-          <div key={page} className='page-transition'>
-            {page === 'overview' && <OverviewPage navigate={navigate} ctx={ctx} />}
-            {page === 'masterkeys' && <MasterKeysPage ctx={ctx} />}
-            {page === 'subkeys' && <SubkeysPage ctx={ctx} />}
-            {page === 'logs' && <LogsPage ctx={ctx} />}
-            {page === 'demo' && <DemoPage ctx={ctx} />}
-            {page === 'health' && <HealthPage ctx={ctx} />}
-            {page === 'notifications' && <NotificationsPage ctx={ctx} />}
-          </div>
-        </main>
-      </div>
-      <div className={`notif ${notif.show ? 'show' : ''} ${notif.type}`}>{notif.msg}</div>
+      <Sidebar
+        page={page}
+        navigate={navigate}
+        onBackToConsole={() => go('/console')}
+        drawerOpen={mobileMenuOpen}
+        setDrawerOpen={setMobileMenuOpen}
+      />
+      <main className='main'>
+        <div key={page} className='page-transition'>
+          {page === 'overview' && <OverviewPage navigate={navigate} ctx={ctx} />}
+          {page === 'masterkeys' && <MasterKeysPage ctx={ctx} />}
+          {page === 'subkeys' && <SubkeysPage ctx={ctx} />}
+          {page === 'logs' && <LogsPage ctx={ctx} />}
+          {page === 'demo' && <DemoPage ctx={ctx} />}
+          {page === 'health' && <HealthPage ctx={ctx} />}
+          {page === 'notifications' && <NotificationsPage ctx={ctx} />}
+        </div>
+      </main>
     </div>
-  );
+    <div className={`notif ${notif.show ? 'show' : ''} ${notif.type}`}>{notif.msg}</div>
+  </>;
 }
