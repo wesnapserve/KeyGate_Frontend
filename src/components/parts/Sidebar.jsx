@@ -22,7 +22,7 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
         {onBackToConsole && <button className='nav-item' onClick={onBackToConsole}>← Back to console</button>}
         {items.map(([k, l]) => <button key={k} className={`nav-item ${page === k ? 'active' : ''}`} onClick={() => navigate(k)}>{l}{k === 'demo' && <span className='nav-dot' />}</button>)}
       </nav>
-      <div className='sidebar-footer'><div className='api-url-box'><div className='api-url-label'>Proxy endpoint</div><div className='api-url'>localhost:3001</div></div></div>
+      <div className='sidebar-footer'><div className='api-url-box'><div className='api-url-label'>Proxy endpoint</div><div className='api-url'>https://keygate-backend.onrender.com/</div></div></div>
     </aside>
 
     <div className={`mobile-drawer-backdrop ${drawerOpen ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setDrawerOpen(false)}>
@@ -31,7 +31,7 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
         <div className='mobile-drawer-list'>
           {items.map(([k, l]) => <button key={k} className={`mobile-drawer-item ${page === k ? 'active' : ''}`} onClick={() => go(k)}>{l}</button>)}
         </div>
-        <div className='mobile-drawer-footer'>localhost:3001</div>
+        <div className='mobile-drawer-footer'>https://keygate-backend.onrender.com/</div>
       </aside>
     </div>
 
