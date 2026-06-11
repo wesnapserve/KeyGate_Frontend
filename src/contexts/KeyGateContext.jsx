@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useMemo, useEffect } from 'react';
-import { cacheGet, cacheSet, cacheBust } from '../lib/cache';
+import { cacheGet, cacheSet, cacheBust, setCacheScope } from '../lib/cache';
 import { useAuth } from './AuthContext';
 
 const CTX = createContext(null);
@@ -14,7 +14,7 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const VALID_PAGES = ['overview', 'masterkeys', 'subkeys', 'logs', 'demo', 'health', 'notifications'];
 
 export default function KeyGateProvider({ children, projectSlug, page }) {
-  const { getAccessToken, isAuthenticated } = useAuth();
+  const { getAccessToken, isAuthenticated, user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [projectName, setProjectName] = useState('');
   const [projectSearch, setProjectSearch] = useState('');
@@ -35,6 +35,10 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
 
   const notify = (msg, type = 'success') => { setNotif({ show: true, msg, type }); setTimeout(() => setNotif((v) => ({ ...v, show: false })), 3000); };
 
+  useEffect(() => {
+    setCacheScope(isAuthenticated && user?.sub ? user.sub : 'public');
+  }, [isAuthenticated, user?.sub]);
+
   const copyText = async (text, id = '') => {
     try {
       await navigator.clipboard.writeText(text);
@@ -53,6 +57,7 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
       ...opts.headers
     };
     const skipAuth = Boolean(opts.skipAuth || opts.headers?.Authorization);
+    const cacheScope = skipAuth ? 'public' : (user?.sub || 'anonymous');
     if (!skipAuth && isAuthenticated) {
       headers.Authorization = `Bearer ${await getAccessToken()}`;
     }
@@ -60,7 +65,7 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
 
     // Return cached GET data if fresh
     if (isRead) {
-      const cached = cacheGet(path);
+      const cached = cacheGet(path, cacheScope);
       if (cached !== null) return cached;
     }
 
@@ -74,14 +79,14 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
 
     // Cache successful reads; bust on mutations
     if (isRead) {
-      cacheSet(path, data);
+      cacheSet(path, data, cacheScope);
     } else {
-      cacheBust(path);
+      cacheBust(path, cacheScope);
       // Bust parent too for nested paths (e.g. POST /api/health/refresh-now
       // should also invalidate cached GET /api/health)
       const segments = path.split('/').filter(Boolean);
       if (segments.length > 2) {
-        cacheBust('/' + segments.slice(0, -1).join('/'));
+        cacheBust('/' + segments.slice(0, -1).join('/'), cacheScope);
       }
     }
 
@@ -101,8 +106,6 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
   };
 
   const loadOverview = async () => {
-    cacheBust('/api/subkeys');
-    cacheBust('/api/analytics');
     setLoading((v) => ({ ...v, overview: true }));
     try {
       const [sks, an] = await Promise.all([api('/api/subkeys'), api('/api/analytics')]);
@@ -115,21 +118,18 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
   };
 
   const loadMasterKeys = async () => {
-    cacheBust('/api/master-keys');
     setLoading((v) => ({ ...v, masterkeys: true }));
     try { setMasterKeys(await api('/api/master-keys')); }
     finally { setLoading((v) => ({ ...v, masterkeys: false })); }
   };
 
   const loadSubkeys = async () => {
-    cacheBust('/api/subkeys');
     setLoading((v) => ({ ...v, subkeys: true }));
     try { setSubkeys(await api('/api/subkeys')); }
     finally { setLoading((v) => ({ ...v, subkeys: false })); }
   };
 
   const loadLogs = async () => {
-    cacheBust('/api/analytics');
     setLoading((v) => ({ ...v, logs: true }));
     try {
       const an = await api('/api/analytics');
@@ -162,7 +162,7 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
       } catch (_) {}
     }
     if (!deleted) throw new Error('Failed to delete project');
-    cacheBust('/api/projects');
+    cacheBust('/api/projects', user?.sub || 'anonymous');
     setDeleteConfirm('');
     setProjectToDelete(null);
     notify('Project deleted');
@@ -209,7 +209,7 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
     api, notify, copyText, modal, setModal, revealedToken, setRevealedToken,
     loadMasterKeys, loadSubkeys, loadLogs, loadOverview,
     subkeys, setSubkeys, masterKeys, logs, analytics, page, loading, copiedItem,
-  }), [modal, subkeys, masterKeys, logs, analytics, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated]);
+  }), [modal, subkeys, masterKeys, logs, analytics, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub]);
 
   const value = useMemo(() => ({
     ctx,
