@@ -1978,7 +1978,7 @@ kbd{
 
 /* ── Desktop (1200px) ── */
 @media (max-width: 1200px){
-  .page{padding:32px 36px}
+  .page{padding:5px 5px}
   .demo-page .snippet-grid{grid-template-columns:repeat(2,1fr)}
 }
 
