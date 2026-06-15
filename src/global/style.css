@@ -405,7 +405,7 @@ tr:hover td{background:rgba(255,255,255,0.04)}
   .mobile-tab.active{background:linear-gradient(150deg,#7c6bff55,#9f76ff33);color:var(--text);border-color:#9a8fff99;transform:translateY(-2px)}
   .mobile-tab.active svg{opacity:1;filter:drop-shadow(0 0 4px rgba(124,107,255,0.4))}
   .main{min-height:calc(100dvh - 72px)}
-  .console-header{display:none}
+  
   .page{max-width:100%;padding:18px 14px}
   .console-select-page{padding:0}
   .console-select-header{display:block;padding:12px 14px;margin:0 0 12px}
