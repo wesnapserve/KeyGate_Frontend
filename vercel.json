@@ -2,11 +2,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/index.html",
-      "missing": [
-        { "type": "header", "key": "Accept", "value": "(?!.*text/html)" }
-      ]
+      "destination": "/index.html"
     }
   ]
 }
-
