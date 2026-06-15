@@ -1172,9 +1172,7 @@ tbody tr:hover{
     grid-template-columns:1fr;
   }
   
-  .app{
-    grid-template-columns:240px 1fr;
-  }
+  
 }
 
 /* ── Tablet (1024px) - Mobile Navigation ── */
