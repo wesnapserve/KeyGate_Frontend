@@ -32,7 +32,7 @@ html{background:
 body{min-height:100vh;display:flex;flex-direction:column}
 
 /* ── Layout ── */
-.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
 .sidebar{background:linear-gradient(180deg,#0f1220,#0d1020 40%,#0b0d19);border-right:1px solid #ffffff1c;padding:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;box-shadow:inset -1px 0 0 #ffffff0a}
 .main{background:
   radial-gradient(1200px 700px at 15% -10%,#7c6bff1f,transparent 55%),
