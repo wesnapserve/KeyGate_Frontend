@@ -1622,7 +1622,7 @@ tbody tr:hover{
 /* ── Extra Small Mobile (480px) ── */
 @media (max-width: 480px){
   .page{
-    padding:16px 12px;
+    padding:5px 5px;
   }
 
   .card{
