@@ -356,9 +356,9 @@ tr:hover td{background:rgba(255,255,255,0.04)}
   .mobile-icon-btn,.mobile-avatar{min-width:44px;min-height:44px;border-radius:14px;border:1px solid #ffffff2f;background:linear-gradient(140deg,#ffffff1f,#ffffff08);color:var(--text);box-shadow:0 8px 24px #05060f52,inset 0 1px 0 #ffffff2b;backdrop-filter:blur(12px) saturate(1.2)}
   .mobile-avatar{font-weight:700}
 
-  .app{grid-template-columns:1fr}
-  .sidebar{display:none}
-  .main{padding-bottom:78px}
+  .app{grid-template-columns:74px 1fr}
+  .sidebar{display:flex}
+  .main{padding-bottom:0}
   .mobile-drawer-backdrop{position:fixed;inset:0;background:#02040ca8;backdrop-filter:blur(6px);z-index:70;transition:opacity .28s ease}
   .mobile-drawer-backdrop.open{display:block}
   .mobile-drawer{height:100%;width:min(85vw,360px);background:linear-gradient(145deg,#191b2ed9,#11131fd4);border-right:1px solid #ffffff2b;padding:16px;transform:translateX(-100%);animation:slideIn .32s cubic-bezier(.22,.61,.36,1) forwards;box-shadow:20px 0 40px #03040d6e,inset 0 1px 0 #ffffff1f;backdrop-filter:blur(16px) saturate(1.2)}
