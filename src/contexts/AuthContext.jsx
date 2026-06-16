@@ -61,7 +61,7 @@ function writeSession(tokenResponse) {
     user: {
       sub: idPayload.sub || accessPayload.sub || '',
       email: idPayload.email || accessPayload.email || '',
-      name: idPayload.name || idPayload.nickname || idPayload.email || 'KeyGate User',
+      name: idPayload.name || idPayload.nickname || idPayload.email || 'Lethem User',
       picture: idPayload.picture || '',
     },
   };

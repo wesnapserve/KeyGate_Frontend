@@ -29,7 +29,7 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
 
     <div className={`mobile-drawer-backdrop ${drawerOpen ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setDrawerOpen(false)}>
       <aside className='mobile-drawer'>
-        <div className='mobile-drawer-title'>KeyGate</div>
+        <div className='mobile-drawer-title'>Lethem</div>
         <div className='mobile-drawer-list'>
           {items.map(([k, l, Icon]) => <button key={k} className={`mobile-drawer-item ${page === k ? 'active' : ''}`} onClick={() => go(k)}><Icon /> {l}</button>)}
         </div>

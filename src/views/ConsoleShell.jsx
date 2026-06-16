@@ -1,4 +1,4 @@
-import { useKeyGate } from '../contexts/KeyGateContext';
+import { useLethem } from '../contexts/LethemContext';
 import Sidebar from '../components/parts/Sidebar';
 import ConsoleHeader from '../components/parts/ConsoleHeader';
 import OverviewPage from '../components/pages/OverviewPage';
@@ -20,7 +20,7 @@ const PAGES = {
 };
 
 export default function ConsoleShell({ go, page, projectSlug }) {
-  const { ctx, selectedProject, mobileMenuOpen, setMobileMenuOpen, notif } = useKeyGate();
+  const { ctx, selectedProject, mobileMenuOpen, setMobileMenuOpen, notif } = useLethem();
 
   const navigate = (p) => go(`/console/${projectSlug}/${p}`);
   const PageComponent = PAGES[page];

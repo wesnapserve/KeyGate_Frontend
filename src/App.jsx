@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import useConsoleRouteState from './hooks/useConsoleRouteState';
-import KeyGateProvider, { useKeyGate, VALID_PAGES } from './contexts/KeyGateContext';
+import LethemProvider, { useLethem, VALID_PAGES } from './contexts/LethemContext';
 import KeyboardShortcuts from './components/parts/KeyboardShortcuts';
 import ProjectSelectView from './views/ProjectSelectView';
 import CreateProjectView from './views/CreateProjectView';
@@ -42,7 +42,7 @@ function AppError({ error, onRetry }) {
 
 // ── Initial data loader: fetches providers & projects, then routes ──
 function BootLoader({ go, view, projectSlug, onBootComplete }) {
-  const { loadProviders, loadProjects, notify } = useKeyGate();
+  const { loadProviders, loadProjects, notify } = useLethem();
   const [bootFailed, setBootFailed] = useState(null);
 
   useEffect(() => {
@@ -92,7 +92,7 @@ function ViewTransition({ view, children }) {
 // ── Router: renders the correct view based on route state ──
 function AppRouter({ routeState }) {
   const { page, view, projectSlug, go, isPublicHealth } = routeState;
-  const { ctx } = useKeyGate();
+  const { ctx } = useLethem();
 
   if (isPublicHealth) {
     const publicCtx = { ...ctx, api: (path, opts = {}) => ctx.api(path, { ...opts, skipAuth: true, headers: {} }) };
@@ -146,7 +146,7 @@ export default function App() {
   if (authLoading) return <BootSplash />;
 
   return (
-    <KeyGateProvider projectSlug={isPublicHealth ? '' : projectSlug} page={page}>
+    <LethemProvider projectSlug={isPublicHealth ? '' : projectSlug} page={page}>
       <AppShell>
         {!isPublicHealth && !isAuthenticated ? (
           <LoginView />
@@ -170,6 +170,6 @@ export default function App() {
           </>
         )}
       </AppShell>
-    </KeyGateProvider>
+    </LethemProvider>
   );
 }
