@@ -8,7 +8,7 @@ import LogsPage from '../components/pages/LogsPage';
 import DemoPage from '../components/pages/DemoPage';
 import HealthPage from '../components/pages/HealthPage';
 import NotificationsPage from '../components/pages/NotificationsPage';
-import PlaceholderPage from '../components/pages/PlaceholderPage';
+import BillingPage from '../components/pages/BillingPage';
 
 const PAGES = {
   overview: OverviewPage,
@@ -18,9 +18,8 @@ const PAGES = {
   demo: DemoPage,
   health: HealthPage,
   notifications: NotificationsPage,
+  billing: BillingPage,
 };
-
-const PLACEHOLDER_PAGES = new Set(['analytics', 'members', 'roles', 'invites', 'usage', 'subscription', 'invoices', 'general', 'endpoint', 'security', 'audit', 'danger', 'profile', 'workspace', 'docs']);
 
 export default function ConsoleShell({ go, page, projectSlug }) {
   const { ctx, selectedProject, mobileMenuOpen, setMobileMenuOpen, notif } = useKeyGate();
@@ -39,7 +38,6 @@ export default function ConsoleShell({ go, page, projectSlug }) {
           onOpenMobileMenu={() => setMobileMenuOpen((open) => !open)}
           onOpenNotifications={() => navigate('notifications')}
           mobileMenuOpen={mobileMenuOpen}
-          navigate={navigate}
         />
         <Sidebar
           page={page}
@@ -50,9 +48,7 @@ export default function ConsoleShell({ go, page, projectSlug }) {
         />
         <main className='main'>
           <div key={page} className='page-transition'>
-            {PLACEHOLDER_PAGES.has(page) ? (
-              <PlaceholderPage type={page} />
-            ) : PageComponent && (
+            {PageComponent && (
               page === 'overview'
                 ? <OverviewPage navigate={navigate} ctx={ctx} />
                 : <PageComponent ctx={ctx} />

@@ -38,12 +38,3 @@ export const IconTrash = (p) => <svg {...s} {...p}><path d="M4 5h12" /><path d="
 export const IconExternal = (p) => <svg {...s} {...p}><path d="M11 3h6v6" /><path d="M17 3 9 11" /><path d="M15 13v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2" /></svg>;
 
 export const IconSearch = (p) => <svg {...s} {...p}><circle cx={9} cy={9} r={4.5} /><path d="m15 15-3.5-3.5" /></svg>;
-export const IconAnalytics = (p) => <svg {...s} {...p}><path d="M4 16V9" /><path d="M10 16V4" /><path d="M16 16v-6" /><path d="M3 16h14" /></svg>;
-
-export const IconTeam = (p) => <svg {...s} {...p}><path d="M7.5 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" /><path d="M2.5 17a5 5 0 0 1 10 0" /><path d="M14 10a2.5 2.5 0 1 0 0-5" /><path d="M14.5 13c1.5.5 2.6 1.8 3 4" /></svg>;
-
-export const IconBilling = (p) => <svg {...s} {...p}><rect x={3} y={5} width={14} height={10} rx={2} /><path d="M3 8h14" /><path d="M6 12h3" /></svg>;
-
-export const IconSettings = (p) => <svg {...s} {...p}><path d="M10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" /><path d="M16.5 11.5v-3l-2-.4a5.8 5.8 0 0 0-.6-1.3l1.1-1.7-2.1-2.1-1.7 1.1a5.8 5.8 0 0 0-1.3-.6L9.5 1.5h-3l-.4 2a5.8 5.8 0 0 0-1.3.6L3.1 3 1 5.1l1.1 1.7a5.8 5.8 0 0 0-.6 1.3l-2 .4v3l2 .4c.1.5.3.9.6 1.3L1 14.9 3.1 17l1.7-1.1c.4.2.8.5 1.3.6l.4 2h3l.4-2c.5-.1.9-.3 1.3-.6l1.7 1.1 2.1-2.1-1.1-1.7c.2-.4.5-.8.6-1.3l2-.4Z" transform="translate(2 0) scale(.8)" /></svg>;
-
-export const IconUser = (p) => <svg {...s} {...p}><path d="M10 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="M3 18a7 7 0 0 1 14 0" /></svg>;
