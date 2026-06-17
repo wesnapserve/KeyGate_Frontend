@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useLethem } from '../contexts/LethemContext';
+import { useKeyGate } from '../contexts/KeyGateContext';
 
 export default function CreateProjectView({ go }) {
-  const { createProject, notif } = useLethem();
+  const { createProject, notif } = useKeyGate();
   const [projectName, setProjectName] = useState('');
 
   const handleCreate = async () => {

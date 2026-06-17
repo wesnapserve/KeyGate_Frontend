@@ -1,4 +1,4 @@
-/* ── Lethem Logo ── */
+/* ── KeyGate Logo ── */
 /* A stylized key + gate/shield symbol */
 
 export function LogoIcon({ size = 28, className = '' }) {
@@ -51,7 +51,7 @@ export function LogoFull({ size = 28, showSub = true }) {
         <LogoIcon size={22} />
       </div>
       <div>
-        <div className='logo-name'>Lethem</div>
+        <div className='logo-name'>KeyGate</div>
         {showSub && <div className='logo-sub'>API access manager</div>}
       </div>
     </div>

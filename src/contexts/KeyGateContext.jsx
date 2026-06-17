@@ -5,13 +5,13 @@ import { useAuth } from './AuthContext';
 const CTX = createContext(null);
 export const useKeyGate = () => useContext(CTX);
 
-const API = import.meta.env.VITE_API_URL || 'https://lethem-backend.onrender.com';
+const API = import.meta.env.VITE_API_URL || 'https://keygate-backend.onrender.com';
 export const fmtNum = (n) => (n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n || 0));
 export const fmtTime = (ts) => (!ts ? '—' : new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
 export const fmtDate = (ts) => (!ts ? 'Never' : new Date(ts * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }));
 export const quotaColor = (used, limit) => (((used / limit) * 100 > 90) ? 'over' : ((used / limit) * 100 > 70) ? 'warn' : 'ok');
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-export const VALID_PAGES = ['overview', 'masterkeys', 'subkeys', 'logs', 'demo', 'health', 'notifications'];
+export const VALID_PAGES = ['overview', 'masterkeys', 'subkeys', 'demo', 'analytics', 'logs', 'notifications', 'health', 'members', 'roles', 'invites', 'usage', 'subscription', 'invoices', 'general', 'endpoint', 'security', 'audit', 'danger', 'profile', 'workspace', 'docs'];
 
 export default function KeyGateProvider({ children, projectSlug, page }) {
   const { getAccessToken, isAuthenticated, user } = useAuth();

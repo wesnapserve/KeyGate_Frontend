@@ -9,7 +9,7 @@ export default function LoginView() {
       <div className='auth-card'>
         <LogoFull size={28} />
         <div className='auth-kicker'>Secure AI access gateway</div>
-        <h1>Sign in to Lethem</h1>
+        <h1>Sign in to KeyGate</h1>
         <p>
           Manage provider master keys, scoped subkeys, quota controls, and gateway logs from a protected console.
         </p>

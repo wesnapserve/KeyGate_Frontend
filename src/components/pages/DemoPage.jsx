@@ -10,7 +10,7 @@ export default function DemoPage({ ctx }) {
   const [selectedSubkeyId, setSelectedSubkeyId] = useState('');
   const [model, setModel] = useState('gpt-4o-mini');
   const [prompt, setPrompt] = useState('Say hello in exactly 5 words.');
-  const [consoleLines, setConsoleLines] = useState(['# Lethem live proxy demo', '# Select a subkey and hit "Run test call" to see the magic', 'ready — waiting for request']);
+  const [consoleLines, setConsoleLines] = useState(['# KeyGate live proxy demo', '# Select a subkey and hit "Run test call" to see the magic', 'ready — waiting for request']);
 
   const active = subkeys.filter((s) => s.status === 'active');
   const selectedSubkey = active.find((s) => s.id === selectedSubkeyId);
@@ -34,9 +34,9 @@ export default function DemoPage({ ctx }) {
   const [copiedSnippet, setCopiedSnippet] = useState('');
   const add = (line) => setConsoleLines((v) => [...v, line]);
 
-  const curlSnippet = `TOKEN="sk-kg-YourTokenHere"\ncurl https://lethem-backend.onrender.com/v1/chat/completions \\\n  -H "Authorization: Bearer $TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"${model}","messages":[{"role":"user","content":"${prompt}"}]}'`;
-  const jsSnippet = `fetch('https://lethem-backend.onrender.com/v1/chat/completions', {\n  method: 'POST',\n  headers: { Authorization: 'Bearer sk-kg-YourTokenHere', 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: '${model}', messages: [{ role: 'user', content: '${prompt}' }] })\n}).then(r => r.json()).then(console.log);`;
-  const pySnippet = `import requests\nres = requests.post('https://lethem-backend.onrender.com/v1/chat/completions',\n  headers={'Authorization':'Bearer sk-kg-YourTokenHere','Content-Type':'application/json'},\n  json={'model':'${model}','messages':[{'role':'user','content':'${prompt}'}]})\nprint(res.json())`;
+  const curlSnippet = `TOKEN="sk-kg-YourTokenHere"\ncurl https://keygate-backend.onrender.com/v1/chat/completions \\\n  -H "Authorization: Bearer $TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"${model}","messages":[{"role":"user","content":"${prompt}"}]}'`;
+  const jsSnippet = `fetch('https://keygate-backend.onrender.com/v1/chat/completions', {\n  method: 'POST',\n  headers: { Authorization: 'Bearer sk-kg-YourTokenHere', 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: '${model}', messages: [{ role: 'user', content: '${prompt}' }] })\n}).then(r => r.json()).then(console.log);`;
+  const pySnippet = `import requests\nres = requests.post('https://keygate-backend.onrender.com/v1/chat/completions',\n  headers={'Authorization':'Bearer sk-kg-YourTokenHere','Content-Type':'application/json'},\n  json={'model':'${model}','messages':[{'role':'user','content':'${prompt}'}]})\nprint(res.json())`;
 
   const runDemo = async () => {
     if (!selectedSubkey) return notify('Select a subkey first', 'error');
@@ -69,7 +69,7 @@ export default function DemoPage({ ctx }) {
       </div>
       <div className='card' style={{ background: '#060609' }}><div className='card-title' style={{ color: 'var(--text)' }}>What the client sends</div><pre style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: 'var(--text)', lineHeight: 1.9, whiteSpace: 'pre-wrap', marginTop: '8px' }}>{preview}</pre></div>
     </div>
-    <div className='console'><div className='console-bar'><div className='dot r' /><div className='dot y' /><div className='dot g' /><span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '8px' }}>Lethem proxy console</span></div><div className='console-body'>{consoleLines.map((l, i) => <p key={i} className='console-line'>{l}</p>)}</div></div>
+    <div className='console'><div className='console-bar'><div className='dot r' /><div className='dot y' /><div className='dot g' /><span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '8px' }}>KeyGate proxy console</span></div><div className='console-body'>{consoleLines.map((l, i) => <p key={i} className='console-line'>{l}</p>)}</div></div>
     <div className='snippet-grid' style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>{snippetCard('Auto-generated JS snippet (click to copy)', jsSnippet)}{snippetCard('Auto-generated Python snippet (click to copy)', pySnippet)}{snippetCard('Auto-generated cURL snippet (click to copy)', curlSnippet)}</div>
   </div></div>;
 }

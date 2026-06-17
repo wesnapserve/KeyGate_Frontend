@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { useLethem } from '../../contexts/LethemContext';
+import { useKeyGate } from '../../contexts/KeyGateContext';
 
 const PAGE_KEYS = ['overview', 'masterkeys', 'subkeys', 'logs', 'demo'];
 
 export default function KeyboardShortcuts({ view, page, navigate }) {
-  const { ctx: { modal, setModal }, projectToDelete, setProjectToDelete, notify } = useLethem();
+  const { ctx: { modal, setModal }, projectToDelete, setProjectToDelete, notify } = useKeyGate();
 
   useEffect(() => {
     const handler = (e) => {

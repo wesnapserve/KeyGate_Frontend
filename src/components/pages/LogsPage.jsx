@@ -57,7 +57,7 @@ export default function LogsPage({ ctx }) {
   const pagedLogs = useMemo(() => filteredLogs.slice((safePage - 1) * pageSize, safePage * pageSize), [filteredLogs, safePage]);
   const sourceCounts = logs.reduce((a, l) => { const k = l.source || 'external'; a[k] = (a[k] || 0) + 1; return a; }, {});
 
-  return <div className='page active'><div style={{ padding: '32px 36px' }}><div className='page-header'><div className='page-title'>Request logs</div><div className='page-sub'>Every request proxied through Lethem</div></div>
+  return <div className='page active'><div style={{ padding: '32px 36px' }}><div className='page-header'><div className='page-title'>Request logs</div><div className='page-sub'>Every request proxied through KeyGate</div></div>
     <div className='card'><div className='card-header'><div className='card-title'>Source breakdown</div></div><div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>{Object.entries(sourceCounts).map(([k, v]) => <span key={k} className='badge active'>{k}: {v}</span>)}</div></div>
     <div className='date-filter-bar'>
       <label>From</label>
