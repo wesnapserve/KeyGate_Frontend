@@ -38,3 +38,13 @@ export const IconTrash = (p) => <svg {...s} {...p}><path d="M4 5h12" /><path d="
 export const IconExternal = (p) => <svg {...s} {...p}><path d="M11 3h6v6" /><path d="M17 3 9 11" /><path d="M15 13v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2" /></svg>;
 
 export const IconSearch = (p) => <svg {...s} {...p}><circle cx={9} cy={9} r={4.5} /><path d="m15 15-3.5-3.5" /></svg>;
+
+export const IconAnalytics = (p) => <svg {...s} {...p}><path d="M4 16V9" /><path d="M10 16V4" /><path d="M16 16v-6" /><path d="M3 16h14" /></svg>;
+
+export const IconTeam = (p) => <svg {...s} {...p}><path d="M7.5 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" /><path d="M2.5 17a5 5 0 0 1 10 0" /><path d="M14 10a2.5 2.5 0 1 0 0-5" /><path d="M14.5 13c1.5.5 2.6 1.8 3 4" /></svg>;
+
+export const IconBilling = (p) => <svg {...s} {...p}><rect x={3} y={5} width={14} height={10} rx={2} /><path d="M3 8h14" /><path d="M6 12h3" /></svg>;
+
+export const IconSettings = (p) => <svg {...s} {...p}><path d="M8.5 3h3l.5 2 1.8.8 1.8-1 1.5 2.6-1.6 1.2.1 1.4 1.5 1.2-1.5 2.6-1.8-1-1.8.8-.5 2h-3l-.5-2-1.8-.8-1.8 1-1.5-2.6L5 10l-.1-1.4-1.5-1.2 1.5-2.6 1.8 1 1.8-.8.5-2Z" /><circle cx={10} cy={10} r={2.5} /></svg>;
+
+export const IconUser = (p) => <svg {...s} {...p}><circle cx={10} cy={6.5} r={3} /><path d="M4 17a6 6 0 0 1 12 0" /></svg>;

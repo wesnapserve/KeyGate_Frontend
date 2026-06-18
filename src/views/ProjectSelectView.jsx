@@ -50,7 +50,7 @@ export default function ProjectSelectView({ go }) {
 
         <div className={`card projects-banner console-info-banner ${showPlanBanner ? '' : 'hidden'}`}>
           <div className='console-banner-text'>Your Free plan includes up to 3 projects and limited resources.</div>
-          <button className='btn btn-ghost btn-sm console-banner-link' style={{ marginTop: 8 }} onClick={() => filteredProjects[0] ? go(`/console/${filteredProjects[0].slug}/billing`) : go('/console/new')}>Upgrade to Pro</button>
+          <button className='btn btn-ghost btn-sm console-banner-link' style={{ marginTop: 8 }} onClick={() => filteredProjects[0] ? go(`/console/${filteredProjects[0].slug}/subscription`) : go('/console/new')}>Upgrade to Pro</button>
           <button className='banner-close' onClick={() => setShowPlanBanner(false)} aria-label='Close banner'>✕</button>
         </div>
 

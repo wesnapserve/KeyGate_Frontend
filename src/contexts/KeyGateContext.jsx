@@ -11,7 +11,7 @@ export const fmtTime = (ts) => (!ts ? '—' : new Date(ts * 1000).toLocaleTimeSt
 export const fmtDate = (ts) => (!ts ? 'Never' : new Date(ts * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }));
 export const quotaColor = (used, limit) => (((used / limit) * 100 > 90) ? 'over' : ((used / limit) * 100 > 70) ? 'warn' : 'ok');
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-export const VALID_PAGES = ['overview', 'masterkeys', 'subkeys', 'logs', 'demo', 'health', 'notifications', 'billing'];
+export const VALID_PAGES = ['overview', 'masterkeys', 'subkeys', 'logs', 'demo', 'health', 'notifications', 'billing', 'analytics', 'members', 'roles', 'invites', 'usage', 'subscription', 'invoices', 'general', 'endpoint', 'security', 'audit', 'danger', 'profile', 'workspace', 'docs'];
 
 export default function KeyGateProvider({ children, projectSlug, page }) {
   const { getAccessToken, isAuthenticated, user } = useAuth();

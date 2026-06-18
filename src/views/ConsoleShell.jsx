@@ -9,6 +9,9 @@ import DemoPage from '../components/pages/DemoPage';
 import HealthPage from '../components/pages/HealthPage';
 import NotificationsPage from '../components/pages/NotificationsPage';
 import BillingPage from '../components/pages/BillingPage';
+import PlaceholderPage from '../components/pages/PlaceholderPage';
+
+const PLACEHOLDER_PAGES = new Set(['analytics', 'members', 'roles', 'invites', 'usage', 'invoices', 'general', 'endpoint', 'security', 'audit', 'danger', 'profile', 'workspace', 'docs']);
 
 const PAGES = {
   overview: OverviewPage,
@@ -19,6 +22,7 @@ const PAGES = {
   health: HealthPage,
   notifications: NotificationsPage,
   billing: BillingPage,
+  subscription: BillingPage,
 };
 
 export default function ConsoleShell({ go, page, projectSlug }) {
@@ -38,6 +42,7 @@ export default function ConsoleShell({ go, page, projectSlug }) {
           onOpenMobileMenu={() => setMobileMenuOpen((open) => !open)}
           onOpenNotifications={() => navigate('notifications')}
           mobileMenuOpen={mobileMenuOpen}
+          navigate={navigate}
         />
         <Sidebar
           page={page}
@@ -48,7 +53,9 @@ export default function ConsoleShell({ go, page, projectSlug }) {
         />
         <main className='main'>
           <div key={page} className='page-transition'>
-            {PageComponent && (
+            {PLACEHOLDER_PAGES.has(page) ? (
+              <PlaceholderPage type={page} />
+            ) : PageComponent && (
               page === 'overview'
                 ? <OverviewPage navigate={navigate} ctx={ctx} />
                 : <PageComponent ctx={ctx} />
