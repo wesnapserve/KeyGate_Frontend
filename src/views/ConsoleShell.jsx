@@ -10,8 +10,10 @@ import HealthPage from '../components/pages/HealthPage';
 import NotificationsPage from '../components/pages/NotificationsPage';
 import BillingPage from '../components/pages/BillingPage';
 import PlaceholderPage from '../components/pages/PlaceholderPage';
+import AnalyticsPage from '../components/pages/AnalyticsPage';
+import UsagePage from '../components/pages/UsagePage';
 
-const PLACEHOLDER_PAGES = new Set(['analytics', 'members', 'roles', 'invites', 'usage', 'invoices', 'general', 'endpoint', 'security', 'audit', 'danger', 'profile', 'workspace', 'docs']);
+const PLACEHOLDER_PAGES = new Set(['members', 'roles', 'invites', 'invoices', 'general', 'endpoint', 'security', 'audit', 'danger', 'profile', 'workspace', 'docs']);
 
 const PAGES = {
   overview: OverviewPage,
@@ -23,34 +25,37 @@ const PAGES = {
   notifications: NotificationsPage,
   billing: BillingPage,
   subscription: BillingPage,
+  analytics: AnalyticsPage,
+  usage: UsagePage,
 };
 
-export default function ConsoleShell({ go, page, projectSlug }) {
-  const { ctx, selectedProject, mobileMenuOpen, setMobileMenuOpen, notif } = useKeyGate();
+export default function ConsoleShell({ go, page, projectSlug, accountMode = false }) {
+  const { ctx, projects, selectedProject, mobileMenuOpen, setMobileMenuOpen, notif } = useKeyGate();
+  const accountProject = selectedProject || { name: 'Account', slug: 'user subscription' };
 
-  const navigate = (p) => go(`/console/${projectSlug}/${p}`);
+  const navigate = (p) => accountMode ? go(`/console/${p}`) : go(`/console/${projectSlug}/${p}`);
   const PageComponent = PAGES[page];
 
   return (
     <>
-      <div className='app'>
+      <div className={`app ${accountMode ? 'account-mode' : ''}`}>
         <ConsoleHeader
           page={page}
-          selectedProject={selectedProject}
-          projectSlug={projectSlug}
+          selectedProject={accountProject}
+          projectSlug={accountMode ? 'account' : projectSlug}
           onSwitchProject={() => go('/console')}
           onOpenMobileMenu={() => setMobileMenuOpen((open) => !open)}
           onOpenNotifications={() => navigate('notifications')}
           mobileMenuOpen={mobileMenuOpen}
           navigate={navigate}
         />
-        <Sidebar
+        {!accountMode && <Sidebar
           page={page}
           navigate={navigate}
           onBackToConsole={() => go('/console')}
           drawerOpen={mobileMenuOpen}
           setDrawerOpen={setMobileMenuOpen}
-        />
+        />}
         <main className='main'>
           <div key={page} className='page-transition'>
             {PLACEHOLDER_PAGES.has(page) ? (
@@ -58,6 +63,7 @@ export default function ConsoleShell({ go, page, projectSlug }) {
             ) : PageComponent && (
               page === 'overview'
                 ? <OverviewPage navigate={navigate} ctx={ctx} />
+                : page === 'usage' ? <UsagePage ctx={{ ...ctx, projects }} billing={ctx.billing} />
                 : <PageComponent ctx={ctx} />
             )}
           </div>

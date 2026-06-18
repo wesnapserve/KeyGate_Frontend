@@ -34,6 +34,7 @@ export default function ProjectSelectView({ go }) {
           <div className='console-plan-badge'>
             <span className='console-plan-dot' /> Free plan <span>{projects.length} / 3 projects</span>
           </div>
+          <button className='btn btn-ghost console-create-btn' onClick={() => go('/console/subscription')}>Manage subscription</button>
           <button className='btn btn-primary console-create-btn' disabled={projects.length >= 3} onClick={() => go('/console/new')}>+ New project</button>
         </div>
       </header>
@@ -50,7 +51,7 @@ export default function ProjectSelectView({ go }) {
 
         <div className={`card projects-banner console-info-banner ${showPlanBanner ? '' : 'hidden'}`}>
           <div className='console-banner-text'>Your Free plan includes up to 3 projects and limited resources.</div>
-          <button className='btn btn-ghost btn-sm console-banner-link' style={{ marginTop: 8 }} onClick={() => filteredProjects[0] ? go(`/console/${filteredProjects[0].slug}/subscription`) : go('/console/new')}>Upgrade to Pro</button>
+          <button className='btn btn-ghost btn-sm console-banner-link' style={{ marginTop: 8 }} onClick={() => go('/console/subscription')}>Upgrade to Pro</button>
           <button className='banner-close' onClick={() => setShowPlanBanner(false)} aria-label='Close banner'>✕</button>
         </div>
 

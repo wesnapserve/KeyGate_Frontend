@@ -10,16 +10,38 @@ const loadRazorpayScript = () => new Promise((resolve, reject) => {
   document.body.appendChild(script);
 });
 
+const readStoredSubscriptionDetails = () => {
+  try { return JSON.parse(localStorage.getItem('kg_subscription_details') || 'null'); }
+  catch { return null; }
+};
+
+const writeStoredSubscriptionDetails = (data) => {
+  try {
+    const detailOnly = {
+      currentPlan: data.currentPlan,
+      subscriptionId: data.subscriptionId,
+      currency: data.currency,
+      testMode: data.testMode,
+      plan: (data.plans || []).find((plan) => plan.id === data.currentPlan) || null,
+    };
+    localStorage.setItem('kg_subscription_details', JSON.stringify(detailOnly));
+  } catch (_) {}
+};
+
 export default function BillingPage({ ctx }) {
-  const { api, notify } = ctx;
+  const { api, notify, loadBilling, setBilling: setCtxBilling } = ctx;
   const [billing, setBilling] = useState(null);
+  const [storedDetails, setStoredDetails] = useState(readStoredSubscriptionDetails());
   const [busyPlan, setBusyPlan] = useState('');
 
   useEffect(() => {
-    api('/api/billing/plans').then(setBilling).catch((e) => notify(e.message, 'error'));
+    (loadBilling ? loadBilling() : api('/api/billing/plans'))
+      .then((data) => { setBilling(data); setCtxBilling?.(data); writeStoredSubscriptionDetails(data); setStoredDetails(readStoredSubscriptionDetails()); })
+      .catch((e) => notify(e.message, 'error'));
   }, []);
 
   const plans = useMemo(() => billing?.plans || [], [billing]);
+  const currentPlan = plans.find((plan) => plan.id === billing?.currentPlan) || storedDetails?.plan;
 
   const startCheckout = async (plan) => {
     if (plan.id === 'free') return;
@@ -34,14 +56,17 @@ export default function BillingPage({ ctx }) {
       const rz = new window.Razorpay({
         key: sub.keyId || billing.keyId,
         name: 'KeyGate',
-        description: `${plan.name} monthly subscription`,
+        description: `${plan.name} account subscription`,
         subscription_id: sub.subscriptionId,
         notes: { plan: plan.id },
         theme: { color: '#7c3aed' },
         handler: async (response) => {
           await api('/api/billing/verify', { method: 'POST', body: { ...response, planId: plan.id } });
-          const fresh = await api('/api/billing/plans');
+          const fresh = loadBilling ? await loadBilling({ refresh: true }) : await api('/api/billing/plans');
           setBilling(fresh);
+          setCtxBilling?.(fresh);
+          writeStoredSubscriptionDetails(fresh);
+          setStoredDetails(readStoredSubscriptionDetails());
           notify(`You're now on ${plan.name}`);
         },
         modal: { ondismiss: () => setBusyPlan('') },
@@ -54,46 +79,39 @@ export default function BillingPage({ ctx }) {
     }
   };
 
-  if (!billing) return <div className='card'>Loading billing plans…</div>;
+  if (!billing && !storedDetails) return <div className='card'>Loading billing plans…</div>;
 
   return (
-    <div className='billing-page'>
-      <div className='page-head'>
+    <div className='billing-page account-billing-page'>
+      <div className='page-head billing-hero'>
         <div>
+          <span className='eyebrow'>Account subscription</span>
           <h1>Plans & Billing</h1>
-          <p>Test real Razorpay subscription checkout in INR while showing USD-friendly pricing.</p>
+          <p>Subscriptions are account-level, not project-level. Upgrade once and your plan limits apply across your KeyGate workspace.</p>
         </div>
-        <span className='badge active'>{billing.testMode ? 'Razorpay test mode' : 'Razorpay live mode'}</span>
+        <span className='badge active'>{billing?.testMode ?? storedDetails?.testMode ? 'Razorpay test mode' : 'Razorpay live mode'}</span>
       </div>
-      <div className='billing-current card'>
-        <div>
-          <div className='muted'>Current plan</div>
-          <strong>{billing.currentPlan}</strong>
-        </div>
-        <div>
-          <div className='muted'>Subscription</div>
-          <strong>{billing.subscriptionStatus}</strong>
-        </div>
-        <div>
-          <div className='muted'>Currency charged</div>
-          <strong>{billing.currency}</strong>
-        </div>
+      <div className='billing-current card billing-current-premium'>
+        <div><div className='muted'>Current plan</div><strong>{currentPlan?.name || billing?.currentPlan || storedDetails?.currentPlan || 'Free'}</strong></div>
+        <div><div className='muted'>Subscription</div><strong>{billing?.subscriptionStatus || 'Refreshing…'}</strong><small>Status is fetched live, plan details are cached locally.</small></div>
+        <div><div className='muted'>Subscription ID</div><strong className='mono'>{billing?.subscriptionId || storedDetails?.subscriptionId || '—'}</strong></div>
+        <div><div className='muted'>Currency charged</div><strong>{billing?.currency || storedDetails?.currency || 'INR'}</strong></div>
       </div>
-      <div className='pricing-grid'>
+      <div className='pricing-grid pricing-grid-premium'>
         {plans.map((plan) => (
-          <div key={plan.id} className={`card pricing-card ${plan.popular ? 'popular' : ''}`}>
+          <div key={plan.id} className={`card pricing-card premium-pricing-card ${plan.popular ? 'popular' : ''}`}>
             {plan.popular && <div className='popular-ribbon'>Most Popular</div>}
-            <h2>{plan.name}</h2>
-            <p>{plan.description}</p>
-            <div className='price-line'>
-              <span>${plan.monthlyUsd}</span><small>/month</small>
+            <div className='pricing-card-top'>
+              <h2>{plan.name}</h2>
+              <p>{plan.description}</p>
             </div>
+            <div className='price-line'><span>${plan.monthlyUsd}</span><small>/month</small></div>
             <div className='inr-line'>{plan.monthlyInr ? `₹${plan.monthlyInr.toLocaleString('en-IN')} charged via Razorpay` : 'No payment required'}</div>
             <ul className='pricing-features'>
-              {plan.features.map((f) => <li key={f}>✓ {f}</li>)}
+              {plan.features.map((f) => <li key={f} title={String(f).startsWith('*Unlimited Projects') ? 'Subject to fair usage' : undefined}>✓ {f}</li>)}
             </ul>
-            <button className={`btn ${plan.popular ? 'btn-primary' : 'btn-ghost'} btn-block`} disabled={plan.id === billing.currentPlan || busyPlan === plan.id} onClick={() => startCheckout(plan)}>
-              {plan.id === billing.currentPlan ? 'Current plan' : plan.id === 'free' ? 'Included' : busyPlan === plan.id ? 'Opening checkout…' : `Upgrade to ${plan.name}`}
+            <button className={`btn ${plan.popular ? 'btn-primary' : 'btn-ghost'} btn-block`} disabled={plan.id === billing?.currentPlan || busyPlan === plan.id} onClick={() => startCheckout(plan)}>
+              {plan.id === billing?.currentPlan ? 'Current plan' : plan.id === 'free' ? 'Included' : busyPlan === plan.id ? 'Opening checkout…' : `Upgrade to ${plan.name}`}
             </button>
           </div>
         ))}

@@ -1,11 +1,11 @@
+import { useState } from 'react';
 import { IconOverview, IconMasterKey, IconSubkey, IconLogs, IconDemo, IconHealth, IconNotifications, IconArrowLeft, IconAnalytics, IconTeam, IconBilling, IconSettings, IconUser } from './Icons';
 
 const sections = [
   { label: 'Overview', items: [['overview', 'Overview', IconOverview]] },
   { label: 'Access', items: [['masterkeys', 'Master keys', IconMasterKey], ['subkeys', 'Subkeys', IconSubkey], ['demo', 'Live demo', IconDemo]] },
-  { label: 'Monitoring', items: [['analytics', 'Analytics', IconAnalytics], ['logs', 'Request logs', IconLogs], ['notifications', 'Notifications', IconNotifications], ['health', 'Health', IconHealth]] },
+  { label: 'Monitoring', items: [['analytics', 'Analytics', IconAnalytics], ['usage', 'Usage', IconBilling], ['logs', 'Request logs', IconLogs], ['notifications', 'Notifications', IconNotifications], ['health', 'Health', IconHealth]] },
   { label: 'Team', items: [['members', 'Members', IconTeam], ['roles', 'Roles', IconUser], ['invites', 'Invites', IconNotifications]] },
-  { label: 'Billing', items: [['usage', 'Usage', IconBilling], ['subscription', 'Subscription', IconBilling], ['invoices', 'Invoices', IconLogs]] },
   { label: 'Settings', items: [['general', 'General', IconSettings], ['endpoint', 'API Endpoint', IconDemo], ['security', 'Security', IconMasterKey], ['audit', 'Audit Logs', IconLogs], ['danger', 'Danger Zone', IconHealth]] },
 ];
 
@@ -14,10 +14,12 @@ const mobileItems = [
   ['masterkeys', 'Access', IconMasterKey],
   ['analytics', 'Monitor', IconAnalytics],
   ['members', 'Team', IconTeam],
-  ['subscription', 'Billing', IconBilling],
+  ['usage', 'Usage', IconBilling],
 ];
 
 export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, setDrawerOpen }) {
+  const [collapsed, setCollapsed] = useState(() => ({}));
+  const toggleSection = (label) => setCollapsed((v) => ({ ...v, [label]: !v[label] }));
   const go = (next) => {
     navigate(next);
     setDrawerOpen(false);
@@ -35,8 +37,8 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
         {onBackToConsole && <button className='nav-item' onClick={onBackToConsole}><IconArrowLeft /> Back to console</button>}
         {sections.map((section) => (
           <div className='nav-section' key={section.label}>
-            <div className='nav-label'>{section.label}</div>
-            {section.items.map((item) => renderItem(item))}
+            <button className='nav-label nav-label-button' onClick={() => toggleSection(section.label)} aria-expanded={!collapsed[section.label]}>{section.label}<span>{collapsed[section.label] ? '+' : '−'}</span></button>
+            {!collapsed[section.label] && section.items.map((item) => renderItem(item))}
           </div>
         ))}
       </nav>
@@ -49,8 +51,8 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
         <div className='mobile-drawer-list'>
           {sections.map((section) => (
             <div className='mobile-drawer-section' key={section.label}>
-              <div className='nav-label'>{section.label}</div>
-              {section.items.map((item) => renderItem(item, true))}
+              <button className='nav-label nav-label-button' onClick={() => toggleSection(section.label)} aria-expanded={!collapsed[section.label]}>{section.label}<span>{collapsed[section.label] ? '+' : '−'}</span></button>
+              {!collapsed[section.label] && section.items.map((item) => renderItem(item, true))}
             </div>
           ))}
         </div>

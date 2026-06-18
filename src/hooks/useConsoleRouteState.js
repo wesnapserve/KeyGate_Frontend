@@ -5,6 +5,7 @@ export default function useConsoleRouteState() {
   const [view, setView] = useState('select');
   const [projectSlug, setProjectSlug] = useState('');
   const [isPublicHealth, setIsPublicHealth] = useState(false);
+  const accountPages = new Set(['subscription', 'billing', 'profile', 'workspace', 'docs']);
 
   const parsePath = () => {
     const params = new URLSearchParams(window.location.search);
@@ -24,6 +25,7 @@ export default function useConsoleRouteState() {
     }
     if (!parts[1]) { setView('select'); setProjectSlug(''); setPage('overview'); return; }
     if (parts[1] === 'new') { setView('create'); setProjectSlug(''); setPage('overview'); return; }
+    if (accountPages.has(parts[1])) { setView('account'); setProjectSlug(''); setPage(parts[1]); return; }
     setView('console');
     setProjectSlug(parts[1]);
     setPage(parts[2] || 'overview');

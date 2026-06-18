@@ -8,6 +8,7 @@ const TTL = {
   '/api/master-keys': 2 * 60 * 1000,     // 2 min  — changes on create/revoke
   '/api/subkeys':   2 * 60 * 1000,       // 2 min  — changes on create/revoke
   '/api/analytics': 30 * 1000,           // 30 sec — changes every request
+  '/api/billing/plans': 10 * 60 * 1000, // 10 min — cache plan details; mutations bust status
 };
 
 const DEFAULT_TTL = 60 * 1000; // 1 min fallback

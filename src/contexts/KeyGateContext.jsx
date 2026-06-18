@@ -32,6 +32,7 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState({ overview: true, masterkeys: true, subkeys: true, logs: true });
   const [copiedItem, setCopiedItem] = useState('');
+  const [billing, setBilling] = useState(null);
 
   const notify = (msg, type = 'success') => { setNotif({ show: true, msg, type }); setTimeout(() => setNotif((v) => ({ ...v, show: false })), 3000); };
 
@@ -51,6 +52,7 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
     const hasBody = opts.body !== undefined;
     const method = (opts.method || 'GET').toUpperCase();
     const isRead = method === 'GET';
+    const noCache = Boolean(opts.noCache);
     const headers = {
       ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
       ...(projectSlug ? { 'x-project-id': projectSlug } : {}),
@@ -62,9 +64,10 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
       headers.Authorization = `Bearer ${await getAccessToken()}`;
     }
     delete opts.skipAuth;
+    delete opts.noCache;
 
     // Return cached GET data if fresh
-    if (isRead) {
+    if (isRead && !noCache) {
       const cached = cacheGet(path, cacheScope);
       if (cached !== null) return cached;
     }
@@ -78,7 +81,7 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
     }
 
     // Cache successful reads; bust on mutations
-    if (isRead) {
+    if (isRead && !noCache) {
       cacheSet(path, data, cacheScope);
     } else {
       cacheBust(path, cacheScope);
@@ -103,6 +106,23 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
     const rows = await api('/api/projects');
     setProjects(rows);
     return rows;
+  };
+
+  const loadBilling = async ({ refresh = false } = {}) => {
+    if (refresh) cacheBust('/api/billing/plans', user?.sub || 'anonymous');
+    const data = await api('/api/billing/plans', { noCache: true });
+    setBilling(data);
+    try {
+      const detailOnly = {
+        currentPlan: data.currentPlan,
+        subscriptionId: data.subscriptionId,
+        currency: data.currency,
+        testMode: data.testMode,
+        plan: (data.plans || []).find((plan) => plan.id === data.currentPlan) || null,
+      };
+      localStorage.setItem('kg_subscription_details', JSON.stringify(detailOnly));
+    } catch (_) {}
+    return data;
   };
 
   const loadOverview = async () => {
@@ -141,7 +161,8 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
   };
 
   const createProject = async (name) => {
-    if (projects.length >= 3) { notify('Maximum 3 projects allowed for now', 'error'); return null; }
+    const projectLimit = billing?.plans?.find((plan) => plan.id === billing.currentPlan)?.limits?.projects ?? 3;
+    if (projectLimit !== null && projects.length >= projectLimit) { notify(`Maximum ${projectLimit} projects allowed on your current plan`, 'error'); return null; }
     const p = await api('/api/projects', { method: 'POST', body: { name } });
     await loadProjects();
     return p;
@@ -172,7 +193,8 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
 
   useEffect(() => {
     if (!projectSlug) return;
-    if (page === 'overview') loadOverview().catch((e) => notify(e.message, 'error'));
+    if (page === 'overview' || page === 'analytics' || page === 'usage') loadOverview().catch((e) => notify(e.message, 'error'));
+    if (page === 'usage') loadBilling().catch(() => {});
     if (page === 'masterkeys') loadMasterKeys().catch((e) => notify(e.message, 'error'));
     if (page === 'subkeys') loadSubkeys().catch((e) => notify(e.message, 'error'));
     if (page === 'logs') loadLogs().catch((e) => notify(e.message, 'error'));
@@ -194,7 +216,7 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
     const onVisible = () => {
       if (document.visibilityState !== 'visible') return;
       if (!projectSlug) return;
-      if (page === 'overview') loadOverview().catch(() => {});
+      if (page === 'overview' || page === 'analytics' || page === 'usage') loadOverview().catch(() => {});
       else if (page === 'masterkeys') loadMasterKeys().catch(() => {});
       else if (page === 'subkeys') loadSubkeys().catch(() => {});
       else if (page === 'logs') loadLogs().catch(() => {});
@@ -207,9 +229,9 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
   const ctx = useMemo(() => ({
     API, providers, loadProviders, fmtNum, fmtTime, fmtDate, quotaColor, sleep,
     api, notify, copyText, modal, setModal, revealedToken, setRevealedToken,
-    loadMasterKeys, loadSubkeys, loadLogs, loadOverview,
-    subkeys, setSubkeys, masterKeys, logs, analytics, page, loading, copiedItem,
-  }), [modal, subkeys, masterKeys, logs, analytics, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub]);
+    loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling,
+    subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, page, loading, copiedItem,
+  }), [modal, subkeys, masterKeys, logs, analytics, billing, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub]);
 
   const value = useMemo(() => ({
     ctx,
@@ -218,7 +240,7 @@ export default function KeyGateProvider({ children, projectSlug, page }) {
     deleteConfirm, setDeleteConfirm, showPlanBanner, setShowPlanBanner,
     mobileMenuOpen, setMobileMenuOpen,
     notif,
-    createProject, deleteProject, loadProviders, loadProjects, notify,
+    createProject, deleteProject, loadProviders, loadProjects, loadBilling, notify,
     filteredProjects: projects.filter((p) =>
       `${p.name} ${p.slug} ${p.id}`.toLowerCase().includes(projectSearch.toLowerCase())
     ),

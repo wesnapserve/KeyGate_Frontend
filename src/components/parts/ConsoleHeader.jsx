@@ -6,6 +6,7 @@ export default function ConsoleHeader({ page, selectedProject, projectSlug, onSw
   const { user, logout } = useAuth();
   const pageTitle = String(page || 'overview').replace(/^./, (m) => m.toUpperCase());
   const go = (target) => navigate?.(target);
+  const goAccount = (target) => { window.history.pushState({}, '', `/console/${target}`); window.dispatchEvent(new Event('popstate')); };
   const userLabel = user?.email || user?.name || 'Signed in';
   const avatar = (user?.email || user?.name || selectedProject?.name || 'K').charAt(0).toUpperCase();
 
@@ -26,10 +27,10 @@ export default function ConsoleHeader({ page, selectedProject, projectSlug, onSw
             <strong>{userLabel}</strong>
           </button>
           <div className='user-menu-panel'>
-            <button onClick={() => go('profile')}><IconUser /> Profile</button>
-            <button onClick={() => go('workspace')}><IconSettings /> Workspace Settings</button>
-            <button onClick={() => go('subscription')}><IconBilling /> Billing</button>
-            <button onClick={() => go('docs')}><IconLogs /> Documentation</button>
+            <button onClick={() => goAccount('profile')}><IconUser /> Profile</button>
+            <button onClick={() => goAccount('workspace')}><IconSettings /> Workspace Settings</button>
+            <button onClick={() => goAccount('subscription')}><IconBilling /> Billing</button>
+            <button onClick={() => goAccount('docs')}><IconLogs /> Documentation</button>
             <button className='danger' onClick={logout}>Logout</button>
           </div>
         </div>
@@ -46,7 +47,7 @@ export default function ConsoleHeader({ page, selectedProject, projectSlug, onSw
       </div>
       <div className='mobile-appbar-actions'>
         <button className='mobile-icon-btn' onClick={onOpenNotifications} aria-label='Notifications'><IconBell width={20} height={20} /></button>
-        <button className='mobile-avatar' onClick={() => go('profile')} aria-label='Profile'>{avatar}</button>
+        <button className='mobile-avatar' onClick={() => goAccount('profile')} aria-label='Profile'>{avatar}</button>
         <button className='mobile-logout' onClick={logout} aria-label='Logout'>Logout</button>
       </div>
     </div>

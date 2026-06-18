@@ -42,7 +42,7 @@ function AppError({ error, onRetry }) {
 
 // ── Initial data loader: fetches providers & projects, then routes ──
 function BootLoader({ go, view, projectSlug, onBootComplete }) {
-  const { loadProviders, loadProjects, notify } = useKeyGate();
+  const { loadProviders, loadProjects, loadBilling, notify } = useKeyGate();
   const [bootFailed, setBootFailed] = useState(null);
 
   useEffect(() => {
@@ -50,16 +50,18 @@ function BootLoader({ go, view, projectSlug, onBootComplete }) {
     setBootFailed(null);
 
     loadProviders().catch(() => {});
+    loadBilling?.().catch(() => {});
     loadProjects()
       .then((list) => {
         if (cancelled) return;
         if (!list.length) {
-          if (view !== 'create') go('/console/new');
+          if (view !== 'create' && view !== 'account') go('/console/new');
           onBootComplete?.();
           return;
         }
         if (window.location.pathname === '/') { go('/console'); onBootComplete?.(); return; }
         if (view === 'create' && list.length >= 3) { go('/console'); onBootComplete?.(); return; }
+        if (view === 'account') { onBootComplete?.(); return; }
         if (projectSlug && !list.find((p) => p.slug === projectSlug || p.id === projectSlug)) {
           notify('Project not found', 'error');
           go('/console');
@@ -108,6 +110,8 @@ function AppRouter({ routeState }) {
       <ViewTransition view={view}>
         {view === 'create' ? (
           <CreateProjectView go={go} />
+        ) : view === 'account' ? (
+          <ConsoleShell go={go} page={page} projectSlug={projectSlug} accountMode />
         ) : view === 'select' || !projectSlug ? (
           <ProjectSelectView go={go} />
         ) : view === 'console' && page && !VALID_PAGES.includes(page) ? (
