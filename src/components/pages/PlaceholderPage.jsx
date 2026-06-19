@@ -50,7 +50,7 @@ const pageCopy = {
     title: 'API Endpoint',
     sub: 'Configure proxy endpoints, environments, and SDK connection details.',
     status: 'Settings preview',
-    cards: [['Proxy endpoint', 'keygate-backend.onrender.com', 'Production gateway'], ['Environment', 'Production', 'Live traffic enabled'], ['SDK status', 'Ready', 'Use this endpoint in clients']],
+    cards: [['Proxy endpoint', 'lethem-backend.onrender.com', 'Production gateway'], ['Environment', 'Production', 'Live traffic enabled'], ['SDK status', 'Ready', 'Use this endpoint in clients']],
   },
   security: {
     title: 'Security',
@@ -74,7 +74,7 @@ const pageCopy = {
     title: 'Profile',
     sub: 'View personal identity details supplied by your authentication provider.',
     status: 'Account preview',
-    cards: [['Name', 'KeyGate User', 'Editable in auth provider'], ['Email', 'user@example.com', 'Verified'], ['Auth provider', 'Auth0', 'Single sign-on ready']],
+    cards: [['Name', 'Lethem User', 'Editable in auth provider'], ['Email', 'user@example.com', 'Verified'], ['Auth provider', 'Auth0', 'Single sign-on ready']],
   },
   workspace: {
     title: 'Workspace Settings',

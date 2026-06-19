@@ -2,9 +2,9 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { cacheClearAll } from '../lib/cache';
 
 const AuthContext = createContext(null);
-const STORAGE_KEY = 'keygate_auth_session';
-const STATE_KEY = 'keygate_auth_state';
-const VERIFIER_KEY = 'keygate_auth_verifier';
+const STORAGE_KEY = 'lethem_auth_session';
+const STATE_KEY = 'lethem_auth_state';
+const VERIFIER_KEY = 'lethem_auth_verifier';
 
 const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN || '';
 const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID || import.meta.env.VITE_CLIENT_ID || '';
@@ -61,7 +61,7 @@ function writeSession(tokenResponse) {
     user: {
       sub: idPayload.sub || accessPayload.sub || '',
       email: idPayload.email || accessPayload.email || '',
-      name: idPayload.name || idPayload.nickname || idPayload.email || 'KeyGate User',
+      name: idPayload.name || idPayload.nickname || idPayload.email || 'Lethem User',
       picture: idPayload.picture || '',
     },
   };
@@ -124,8 +124,8 @@ export function AuthProvider({ children }) {
         const nextSession = await exchangeCodeForToken(code, verifier);
         cacheClearAll();
         if (!cancelled) setSession(nextSession);
-        const returnTo = sessionStorage.getItem('keygate_return_to') || '/console';
-        sessionStorage.removeItem('keygate_return_to');
+        const returnTo = sessionStorage.getItem('lethem_return_to') || '/console';
+        sessionStorage.removeItem('lethem_return_to');
         window.history.replaceState({}, '', returnTo);
         window.dispatchEvent(new PopStateEvent('popstate'));
       } catch (err) {
@@ -151,7 +151,7 @@ export function AuthProvider({ children }) {
     const challenge = base64UrlEncode(await sha256(verifier));
     sessionStorage.setItem(STATE_KEY, state);
     sessionStorage.setItem(VERIFIER_KEY, verifier);
-    sessionStorage.setItem('keygate_return_to', window.location.pathname + window.location.search);
+    sessionStorage.setItem('lethem_return_to', window.location.pathname + window.location.search);
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: auth0ClientId,

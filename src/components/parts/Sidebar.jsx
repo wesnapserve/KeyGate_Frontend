@@ -42,12 +42,12 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
           </div>
         ))}
       </nav>
-      <div className='sidebar-footer'><div className='api-url-box'><div className='api-url-label'>Proxy endpoint</div><div className='api-url'>https://keygate-backend.onrender.com/</div></div></div>
+      <div className='sidebar-footer'><div className='api-url-box'><div className='api-url-label'>Proxy endpoint</div><div className='api-url'>https://lethem-backend.onrender.com/</div></div></div>
     </aside>
 
     <div className={`mobile-drawer-backdrop ${drawerOpen ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setDrawerOpen(false)}>
       <aside className='mobile-drawer'>
-        <div className='mobile-drawer-title'>KeyGate</div>
+        <div className='mobile-drawer-title'>Lethem</div>
         <div className='mobile-drawer-list'>
           {sections.map((section) => (
             <div className='mobile-drawer-section' key={section.label}>
@@ -56,7 +56,7 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
             </div>
           ))}
         </div>
-        <div className='mobile-drawer-footer'>https://keygate-backend.onrender.com/</div>
+        <div className='mobile-drawer-footer'>https://lethem-backend.onrender.com/</div>
       </aside>
     </div>
 

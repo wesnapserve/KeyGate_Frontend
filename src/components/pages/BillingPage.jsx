@@ -11,7 +11,7 @@ const loadRazorpayScript = () => new Promise((resolve, reject) => {
 });
 
 const readStoredSubscriptionDetails = () => {
-  try { return JSON.parse(localStorage.getItem('kg_subscription_details') || 'null'); }
+  try { return JSON.parse(localStorage.getItem('lethem_subscription_details') || 'null'); }
   catch { return null; }
 };
 
@@ -20,11 +20,12 @@ const writeStoredSubscriptionDetails = (data) => {
     const detailOnly = {
       currentPlan: data.currentPlan,
       subscriptionId: data.subscriptionId,
+      subscriptionStatus: data.subscriptionStatus,
       currency: data.currency,
       testMode: data.testMode,
       plan: (data.plans || []).find((plan) => plan.id === data.currentPlan) || null,
     };
-    localStorage.setItem('kg_subscription_details', JSON.stringify(detailOnly));
+    localStorage.setItem('lethem_subscription_details', JSON.stringify(detailOnly));
   } catch (_) {}
 };
 
@@ -55,7 +56,7 @@ export default function BillingPage({ ctx }) {
       const sub = await api('/api/billing/subscriptions', { method: 'POST', body: { planId: plan.id } });
       const rz = new window.Razorpay({
         key: sub.keyId || billing.keyId,
-        name: 'KeyGate',
+        name: 'Lethem',
         description: `${plan.name} account subscription`,
         subscription_id: sub.subscriptionId,
         notes: { plan: plan.id },
@@ -83,17 +84,18 @@ export default function BillingPage({ ctx }) {
 
   return (
     <div className='billing-page account-billing-page'>
+      <button className='btn btn-ghost btn-sm billing-back' onClick={() => { window.history.pushState({}, '', '/console'); window.dispatchEvent(new Event('popstate')); }}>← Back to console</button>
       <div className='page-head billing-hero'>
         <div>
           <span className='eyebrow'>Account subscription</span>
           <h1>Plans & Billing</h1>
-          <p>Subscriptions are account-level, not project-level. Upgrade once and your plan limits apply across your KeyGate workspace.</p>
+          <p>Subscriptions are account-level, not project-level. Upgrade once and your plan limits apply across your Lethem workspace.</p>
         </div>
         <span className='badge active'>{billing?.testMode ?? storedDetails?.testMode ? 'Razorpay test mode' : 'Razorpay live mode'}</span>
       </div>
       <div className='billing-current card billing-current-premium'>
         <div><div className='muted'>Current plan</div><strong>{currentPlan?.name || billing?.currentPlan || storedDetails?.currentPlan || 'Free'}</strong></div>
-        <div><div className='muted'>Subscription</div><strong>{billing?.subscriptionStatus || 'Refreshing…'}</strong><small>Status is fetched live, plan details are cached locally.</small></div>
+        <div><div className='muted'>Subscription</div><strong>{billing?.subscriptionStatus || storedDetails?.subscriptionStatus || 'Refreshing…'}</strong><small>Status is fetched live, plan details are cached locally.</small></div>
         <div><div className='muted'>Subscription ID</div><strong className='mono'>{billing?.subscriptionId || storedDetails?.subscriptionId || '—'}</strong></div>
         <div><div className='muted'>Currency charged</div><strong>{billing?.currency || storedDetails?.currency || 'INR'}</strong></div>
       </div>

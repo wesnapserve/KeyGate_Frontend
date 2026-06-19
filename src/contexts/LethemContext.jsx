@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { cacheGet, cacheSet, cacheBust, setCacheScope } from '../lib/cache';
 import { useAuth } from './AuthContext';
 
-const CTX = createContext(null); 
+const CTX = createContext(null);
 export const useLethem = () => useContext(CTX);
 
 const API = import.meta.env.VITE_API_URL || 'https://lethem-backend.onrender.com';
@@ -11,7 +11,7 @@ export const fmtTime = (ts) => (!ts ? '—' : new Date(ts * 1000).toLocaleTimeSt
 export const fmtDate = (ts) => (!ts ? 'Never' : new Date(ts * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }));
 export const quotaColor = (used, limit) => (((used / limit) * 100 > 90) ? 'over' : ((used / limit) * 100 > 70) ? 'warn' : 'ok');
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-export const VALID_PAGES = ['overview', 'masterkeys', 'subkeys', 'logs', 'demo', 'health', 'notifications'];
+export const VALID_PAGES = ['overview', 'masterkeys', 'subkeys', 'logs', 'demo', 'health', 'notifications', 'billing', 'analytics', 'members', 'roles', 'invites', 'usage', 'subscription', 'invoices', 'general', 'endpoint', 'security', 'audit', 'danger', 'profile', 'workspace', 'docs'];
 
 export default function LethemProvider({ children, projectSlug, page }) {
   const { getAccessToken, isAuthenticated, user } = useAuth();
@@ -32,6 +32,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState({ overview: true, masterkeys: true, subkeys: true, logs: true });
   const [copiedItem, setCopiedItem] = useState('');
+  const [billing, setBilling] = useState(null);
 
   const notify = (msg, type = 'success') => { setNotif({ show: true, msg, type }); setTimeout(() => setNotif((v) => ({ ...v, show: false })), 3000); };
 
@@ -51,6 +52,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
     const hasBody = opts.body !== undefined;
     const method = (opts.method || 'GET').toUpperCase();
     const isRead = method === 'GET';
+    const noCache = Boolean(opts.noCache);
     const headers = {
       ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
       ...(projectSlug ? { 'x-project-id': projectSlug } : {}),
@@ -62,9 +64,10 @@ export default function LethemProvider({ children, projectSlug, page }) {
       headers.Authorization = `Bearer ${await getAccessToken()}`;
     }
     delete opts.skipAuth;
+    delete opts.noCache;
 
     // Return cached GET data if fresh
-    if (isRead) {
+    if (isRead && !noCache) {
       const cached = cacheGet(path, cacheScope);
       if (cached !== null) return cached;
     }
@@ -78,7 +81,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
     }
 
     // Cache successful reads; bust on mutations
-    if (isRead) {
+    if (isRead && !noCache) {
       cacheSet(path, data, cacheScope);
     } else {
       cacheBust(path, cacheScope);
@@ -105,6 +108,24 @@ export default function LethemProvider({ children, projectSlug, page }) {
     return rows;
   };
 
+  const loadBilling = async ({ refresh = false } = {}) => {
+    if (refresh) cacheBust('/api/billing/plans', user?.sub || 'anonymous');
+    const data = await api('/api/billing/plans', { noCache: true });
+    setBilling(data);
+    try {
+      const detailOnly = {
+        currentPlan: data.currentPlan,
+        subscriptionId: data.subscriptionId,
+        subscriptionStatus: data.subscriptionStatus,
+        currency: data.currency,
+        testMode: data.testMode,
+        plan: (data.plans || []).find((plan) => plan.id === data.currentPlan) || null,
+      };
+      localStorage.setItem('lethem_subscription_details', JSON.stringify(detailOnly));
+    } catch (_) {}
+    return data;
+  };
+
   const loadOverview = async () => {
     setLoading((v) => ({ ...v, overview: true }));
     try {
@@ -112,6 +133,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
       setSubkeys(sks);
       setLogs(an.logs || []);
       setAnalytics(an);
+      setLoading((v) => ({ ...v, logs: false }));
     } finally {
       setLoading((v) => ({ ...v, overview: false }));
     }
@@ -141,18 +163,19 @@ export default function LethemProvider({ children, projectSlug, page }) {
   };
 
   const createProject = async (name) => {
-    if (projects.length >= 3) { notify('Maximum 3 projects allowed for now', 'error'); return null; }
+    const projectLimit = billing?.plans?.find((plan) => plan.id === billing.currentPlan)?.limits?.projects ?? 3;
+    if (projectLimit !== null && projects.length >= projectLimit) { notify(`Maximum ${projectLimit} projects allowed on your current plan`, 'error'); return null; }
     const p = await api('/api/projects', { method: 'POST', body: { name } });
     await loadProjects();
     return p;
   };
 
-  const deleteProject = async () => {
-    if (!projectToDelete) return;
-    const ref = encodeURIComponent(projectToDelete.slug || projectToDelete.id);
+  const deleteProject = async (targetProject = projectToDelete) => {
+    if (!targetProject) return;
+    const ref = encodeURIComponent(targetProject.slug || targetProject.id);
     const attempts = [
       { path: `/api/projects/by-slug/${ref}`, method: 'DELETE' },
-      { path: `/api/projects/${encodeURIComponent(projectToDelete.id)}`, method: 'DELETE' },
+      { path: `/api/projects/${encodeURIComponent(targetProject.id)}`, method: 'DELETE' },
     ];
     let deleted = false;
     for (const attempt of attempts) {
@@ -172,7 +195,8 @@ export default function LethemProvider({ children, projectSlug, page }) {
 
   useEffect(() => {
     if (!projectSlug) return;
-    if (page === 'overview') loadOverview().catch((e) => notify(e.message, 'error'));
+    if (page === 'overview' || page === 'analytics' || page === 'usage') loadOverview().catch((e) => notify(e.message, 'error'));
+    if (page === 'usage') loadBilling().catch(() => {});
     if (page === 'masterkeys') loadMasterKeys().catch((e) => notify(e.message, 'error'));
     if (page === 'subkeys') loadSubkeys().catch((e) => notify(e.message, 'error'));
     if (page === 'logs') loadLogs().catch((e) => notify(e.message, 'error'));
@@ -194,7 +218,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
     const onVisible = () => {
       if (document.visibilityState !== 'visible') return;
       if (!projectSlug) return;
-      if (page === 'overview') loadOverview().catch(() => {});
+      if (page === 'overview' || page === 'analytics' || page === 'usage') loadOverview().catch(() => {});
       else if (page === 'masterkeys') loadMasterKeys().catch(() => {});
       else if (page === 'subkeys') loadSubkeys().catch(() => {});
       else if (page === 'logs') loadLogs().catch(() => {});
@@ -207,9 +231,9 @@ export default function LethemProvider({ children, projectSlug, page }) {
   const ctx = useMemo(() => ({
     API, providers, loadProviders, fmtNum, fmtTime, fmtDate, quotaColor, sleep,
     api, notify, copyText, modal, setModal, revealedToken, setRevealedToken,
-    loadMasterKeys, loadSubkeys, loadLogs, loadOverview,
-    subkeys, setSubkeys, masterKeys, logs, analytics, page, loading, copiedItem,
-  }), [modal, subkeys, masterKeys, logs, analytics, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub]);
+    loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling,
+    subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, page, loading, copiedItem,
+  }), [modal, subkeys, masterKeys, logs, analytics, billing, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub]);
 
   const value = useMemo(() => ({
     ctx,
@@ -218,7 +242,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
     deleteConfirm, setDeleteConfirm, showPlanBanner, setShowPlanBanner,
     mobileMenuOpen, setMobileMenuOpen,
     notif,
-    createProject, deleteProject, loadProviders, loadProjects, notify,
+    createProject, deleteProject, loadProviders, loadProjects, loadBilling, notify,
     filteredProjects: projects.filter((p) =>
       `${p.name} ${p.slug} ${p.id}`.toLowerCase().includes(projectSearch.toLowerCase())
     ),

@@ -2237,3 +2237,15 @@ kbd{
 .usage-card-head div{display:flex;flex-direction:column;gap:4px}.usage-card-head span{color:var(--muted);font-size:12px}
 @media (max-width:1100px){.pricing-grid-premium{grid-template-columns:repeat(2,minmax(0,1fr))}.billing-current-premium,.analytics-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:720px){.account-billing-page{padding:20px}.billing-current-premium,.analytics-grid,.usage-list{grid-template-columns:1fr}.pricing-card-top{min-height:auto}}
+
+/* Lethem polish and safer responsive shell fixes */
+.app{grid-template-columns:minmax(220px,240px) minmax(0,1fr)}
+@media (max-width:1100px){.app{grid-template-columns:minmax(200px,230px) minmax(0,1fr)}}
+@media (max-width:900px){.app{grid-template-columns:1fr}}
+.sidebar .nav,.mobile-drawer-list{scrollbar-color:rgba(124,107,255,.62) rgba(255,255,255,.06)}
+.sidebar .nav::-webkit-scrollbar-track,.mobile-drawer-list::-webkit-scrollbar-track{background:rgba(255,255,255,.045);border-radius:999px}
+.sidebar .nav::-webkit-scrollbar-thumb,.mobile-drawer-list::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent),#a594ff);border:2px solid rgba(9,11,22,.95);border-radius:999px}
+.sidebar .nav::-webkit-scrollbar-thumb:hover,.mobile-drawer-list::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#a594ff,var(--accent2))}
+.app-shell-header,.user-menu{position:relative;z-index:10000}.user-menu-panel{z-index:10001}.page.active,.page-transition{z-index:0}
+.app.account-mode .main{max-width:none;margin:0;width:100%}.app.account-mode .page-transition{width:100%}.account-billing-page{width:100%;max-width:none}.billing-back{align-self:flex-start;margin-bottom:4px}
+.danger-page{display:flex!important;flex-direction:column;gap:16px}.danger-action-card{display:flex;align-items:center;justify-content:space-between;gap:18px;border-color:rgba(255,82,82,.24)}.danger-action-card h2{margin:0 0 6px}.danger-action-card p{margin:0;color:var(--muted);line-height:1.5}.danger-action-card input{margin-top:12px;max-width:360px}.danger-action-card-critical{background:linear-gradient(135deg,rgba(255,82,82,.13),rgba(255,255,255,.03))}@media (max-width:720px){.danger-action-card{align-items:stretch;flex-direction:column}.danger-action-card .btn{width:100%;justify-content:center}}

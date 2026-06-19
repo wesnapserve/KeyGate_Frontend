@@ -42,7 +42,7 @@ export default function ConsoleHeader({ page, selectedProject, projectSlug, onSw
         <IconMenu width={20} height={20} />
       </button>
       <div>
-        <div className='mobile-brand'>KeyGate</div>
+        <div className='mobile-brand'>Lethem</div>
         <div className='mobile-shell-sub'>{pageTitle}</div>
       </div>
       <div className='mobile-appbar-actions'>

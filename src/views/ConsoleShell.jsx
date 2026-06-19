@@ -1,4 +1,4 @@
-import { useKeyGate } from '../contexts/KeyGateContext';
+import { useLethem } from '../contexts/LethemContext';
 import Sidebar from '../components/parts/Sidebar';
 import ConsoleHeader from '../components/parts/ConsoleHeader';
 import OverviewPage from '../components/pages/OverviewPage';
@@ -12,8 +12,9 @@ import BillingPage from '../components/pages/BillingPage';
 import PlaceholderPage from '../components/pages/PlaceholderPage';
 import AnalyticsPage from '../components/pages/AnalyticsPage';
 import UsagePage from '../components/pages/UsagePage';
+import DangerPage from '../components/pages/DangerPage';
 
-const PLACEHOLDER_PAGES = new Set(['members', 'roles', 'invites', 'invoices', 'general', 'endpoint', 'security', 'audit', 'danger', 'profile', 'workspace', 'docs']);
+const PLACEHOLDER_PAGES = new Set(['members', 'roles', 'invites', 'invoices', 'general', 'endpoint', 'security', 'audit', 'profile', 'workspace', 'docs']);
 
 const PAGES = {
   overview: OverviewPage,
@@ -27,10 +28,11 @@ const PAGES = {
   subscription: BillingPage,
   analytics: AnalyticsPage,
   usage: UsagePage,
+  danger: DangerPage,
 };
 
 export default function ConsoleShell({ go, page, projectSlug, accountMode = false }) {
-  const { ctx, projects, selectedProject, mobileMenuOpen, setMobileMenuOpen, notif } = useKeyGate();
+  const { ctx, projects, selectedProject, mobileMenuOpen, setMobileMenuOpen, notif, deleteProject, setProjectToDelete } = useLethem();
   const accountProject = selectedProject || { name: 'Account', slug: 'user subscription' };
 
   const navigate = (p) => accountMode ? go(`/console/${p}`) : go(`/console/${projectSlug}/${p}`);
@@ -64,6 +66,7 @@ export default function ConsoleShell({ go, page, projectSlug, accountMode = fals
               page === 'overview'
                 ? <OverviewPage navigate={navigate} ctx={ctx} />
                 : page === 'usage' ? <UsagePage ctx={{ ...ctx, projects }} billing={ctx.billing} />
+                : page === 'danger' ? <DangerPage ctx={ctx} selectedProject={selectedProject} deleteProject={deleteProject} setProjectToDelete={setProjectToDelete} />
                 : <PageComponent ctx={ctx} />
             )}
           </div>

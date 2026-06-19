@@ -10,7 +10,7 @@ export default function DemoPage({ ctx }) {
   const [selectedSubkeyId, setSelectedSubkeyId] = useState('');
   const [model, setModel] = useState('gpt-4o-mini');
   const [prompt, setPrompt] = useState('Say hello in exactly 5 words.');
-  const [consoleLines, setConsoleLines] = useState(['# KeyGate live proxy demo', '# Select a subkey and hit "Run test call" to see the magic', 'ready — waiting for request']);
+  const [consoleLines, setConsoleLines] = useState(['# Lethem live proxy demo', '# Select a subkey and hit "Run test call" to see the magic', 'ready — waiting for request']);
 
   const active = subkeys.filter((s) => s.status === 'active');
   const selectedSubkey = active.find((s) => s.id === selectedSubkeyId);
@@ -30,25 +30,25 @@ export default function DemoPage({ ctx }) {
     if (!allowedModelList.includes(model)) setModel(allowedModelList[0] || providerDefaultModel(providerOptions, selectedSubkey?.provider || 'openai'));
   }, [allowedModelList, model, selectedSubkey, providerOptions]);
 
-  const preview = !selectedSubkey ? 'Select a subkey to see the request preview...' : `POST /v1/chat/completions\nAuthorization: Bearer ${tokenPreview || 'sk-kg-••••'}\n\n{\n  "model": "${model}",\n  "messages": [{\n    "role": "user",\n    "content": "${prompt}"\n  }]\n}`;
+  const preview = !selectedSubkey ? 'Select a subkey to see the request preview...' : `POST /v1/chat/completions\nAuthorization: Bearer ${tokenPreview || 'sk-lt-••••'}\n\n{\n  "model": "${model}",\n  "messages": [{\n    "role": "user",\n    "content": "${prompt}"\n  }]\n}`;
   const [copiedSnippet, setCopiedSnippet] = useState('');
   const add = (line) => setConsoleLines((v) => [...v, line]);
 
-  const curlSnippet = `TOKEN="sk-kg-YourTokenHere"\ncurl https://keygate-backend.onrender.com/v1/chat/completions \\\n  -H "Authorization: Bearer $TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"${model}","messages":[{"role":"user","content":"${prompt}"}]}'`;
-  const jsSnippet = `fetch('https://keygate-backend.onrender.com/v1/chat/completions', {\n  method: 'POST',\n  headers: { Authorization: 'Bearer sk-kg-YourTokenHere', 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: '${model}', messages: [{ role: 'user', content: '${prompt}' }] })\n}).then(r => r.json()).then(console.log);`;
-  const pySnippet = `import requests\nres = requests.post('https://keygate-backend.onrender.com/v1/chat/completions',\n  headers={'Authorization':'Bearer sk-kg-YourTokenHere','Content-Type':'application/json'},\n  json={'model':'${model}','messages':[{'role':'user','content':'${prompt}'}]})\nprint(res.json())`;
+  const curlSnippet = `TOKEN="sk-lt-YourTokenHere"\ncurl https://lethem-backend.onrender.com/v1/chat/completions \\\n  -H "Authorization: Bearer $TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"${model}","messages":[{"role":"user","content":"${prompt}"}]}'`;
+  const jsSnippet = `fetch('https://lethem-backend.onrender.com/v1/chat/completions', {\n  method: 'POST',\n  headers: { Authorization: 'Bearer sk-lt-YourTokenHere', 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: '${model}', messages: [{ role: 'user', content: '${prompt}' }] })\n}).then(r => r.json()).then(console.log);`;
+  const pySnippet = `import requests\nres = requests.post('https://lethem-backend.onrender.com/v1/chat/completions',\n  headers={'Authorization':'Bearer sk-lt-YourTokenHere','Content-Type':'application/json'},\n  json={'model':'${model}','messages':[{'role':'user','content':'${prompt}'}]})\nprint(res.json())`;
 
   const runDemo = async () => {
     if (!selectedSubkey) return notify('Select a subkey first', 'error');
     if (!prompt.trim()) return notify('Enter a prompt', 'error');
     if (!model) return notify('Select a model', 'error');
-    const tokenHint = selectedSubkey.token_preview || selectedSubkey.token_prefix || 'sk-kg-';
+    const tokenHint = selectedSubkey.token_preview || selectedSubkey.token_prefix || 'sk-lt-';
     setConsoleLines([`$ sending request with subkey ${tokenHint}…`]);
     await sleep(250); add('→ validating subkey + model allowlist');
     await sleep(250); add(`→ provider/model: ${providerLabel(providerOptions, selectedSubkey.provider)} / ${model}`);
     try {
       const demoToken = (await api(`/api/subkeys/${selectedSubkey.id}/demo-token`)).token;
-      const res = await fetch(API + '/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-keygate-client': 'dashboard', Authorization: 'Bearer ' + demoToken }, body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], max_tokens: 150 }) });
+      const res = await fetch(API + '/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-lethem-client': 'dashboard', Authorization: 'Bearer ' + demoToken }, body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], max_tokens: 150 }) });
       const data = await res.json();
       if (!res.ok) { add(`✗ error ${res.status}: ${data.error?.message || 'unknown error'}`); return; }
       add(`✓ response received`); add(`→ tokens used: ${data.usage?.total_tokens || 0}`); add('AI response:'); add(data.choices?.[0]?.message?.content || ''); notify('Request proxied — check logs for usage');
@@ -69,7 +69,7 @@ export default function DemoPage({ ctx }) {
       </div>
       <div className='card' style={{ background: '#060609' }}><div className='card-title' style={{ color: 'var(--text)' }}>What the client sends</div><pre style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: 'var(--text)', lineHeight: 1.9, whiteSpace: 'pre-wrap', marginTop: '8px' }}>{preview}</pre></div>
     </div>
-    <div className='console'><div className='console-bar'><div className='dot r' /><div className='dot y' /><div className='dot g' /><span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '8px' }}>KeyGate proxy console</span></div><div className='console-body'>{consoleLines.map((l, i) => <p key={i} className='console-line'>{l}</p>)}</div></div>
+    <div className='console'><div className='console-bar'><div className='dot r' /><div className='dot y' /><div className='dot g' /><span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '8px' }}>Lethem proxy console</span></div><div className='console-body'>{consoleLines.map((l, i) => <p key={i} className='console-line'>{l}</p>)}</div></div>
     <div className='snippet-grid' style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>{snippetCard('Auto-generated JS snippet (click to copy)', jsSnippet)}{snippetCard('Auto-generated Python snippet (click to copy)', pySnippet)}{snippetCard('Auto-generated cURL snippet (click to copy)', curlSnippet)}</div>
   </div></div>;
 }

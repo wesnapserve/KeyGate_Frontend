@@ -1,4 +1,4 @@
-import { useKeyGate } from '../contexts/KeyGateContext';
+import { useLethem } from '../contexts/LethemContext';
 
 export default function ProjectSelectView({ go }) {
   const {
@@ -8,7 +8,7 @@ export default function ProjectSelectView({ go }) {
     deleteConfirm, setDeleteConfirm, deleteProject,
     notif, notify,
     ctx: { fmtDate },
-  } = useKeyGate();
+  } = useLethem();
 
   const expectedDeleteText = projectToDelete ? `delete ${projectToDelete.slug}` : '';
   const canDeleteProject = projectToDelete && deleteConfirm.trim() === expectedDeleteText;
