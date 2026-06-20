@@ -26,7 +26,7 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
   };
 
   const renderItem = ([key, label, Icon], mobile = false) => (
-    <button key={key} className={`${mobile ? 'mobile-drawer-item' : 'nav-item'} ${page === key ? 'active' : ''}`} onClick={() => (mobile ? go(key) : navigate(key))}>
+    <button key={key} className={`${mobile ? 'mobile-drawer-item' : 'nav-item'} ${key === 'danger' ? 'danger-nav-item' : ''} ${page === key ? 'active' : ''}`} onClick={() => (mobile ? go(key) : navigate(key))}>
       <Icon /> {label}{key === 'demo' && <span className='nav-dot' />}
     </button>
   );

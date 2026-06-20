@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useMemo, useEffect } from 'react';
-import { cacheGet, cacheSet, cacheBust, setCacheScope } from '../lib/cache';
+import { cacheGet, cacheSet, cacheBust, cacheBustAfterMutation, cachePruneExpired, setCacheScope } from '../lib/cache';
 import { useAuth } from './AuthContext';
 
 const CTX = createContext(null);
@@ -38,6 +38,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
 
   useEffect(() => {
     setCacheScope(isAuthenticated && user?.sub ? user.sub : 'public');
+    cachePruneExpired();
   }, [isAuthenticated, user?.sub]);
 
   const copyText = async (text, id = '') => {
@@ -80,17 +81,11 @@ export default function LethemProvider({ children, projectSlug, page }) {
       throw err;
     }
 
-    // Cache successful reads; bust on mutations
-    if (isRead && !noCache) {
-      cacheSet(path, data, cacheScope);
+    // Cache successful reads; bust only real mutations. noCache GETs bypass storage without invalidating.
+    if (isRead) {
+      if (!noCache) cacheSet(path, data, cacheScope);
     } else {
-      cacheBust(path, cacheScope);
-      // Bust parent too for nested paths (e.g. POST /api/health/refresh-now
-      // should also invalidate cached GET /api/health)
-      const segments = path.split('/').filter(Boolean);
-      if (segments.length > 2) {
-        cacheBust('/' + segments.slice(0, -1).join('/'), cacheScope);
-      }
+      cacheBustAfterMutation(path, cacheScope);
     }
 
     return data;

@@ -5,11 +5,31 @@ export default function useConsoleRouteState() {
   const [view, setView] = useState('select');
   const [projectSlug, setProjectSlug] = useState('');
   const [isPublicHealth, setIsPublicHealth] = useState(false);
+  const [publicPage, setPublicPage] = useState('');
   const accountPages = new Set(['subscription', 'billing', 'profile', 'workspace', 'docs']);
 
   const parsePath = () => {
     const params = new URLSearchParams(window.location.search);
     if (params.has('code') && params.has('state')) return;
+
+    const publicRoutes = {
+      '/': 'landing',
+      '/terms-and-conditions': 'terms',
+      '/privacy-policy': 'privacy',
+      '/refund-and-cancellation-policy': 'refund',
+      '/shipping-delivery-policy': 'shipping',
+    };
+
+    if (publicRoutes[window.location.pathname]) {
+      setPublicPage(publicRoutes[window.location.pathname]);
+      setIsPublicHealth(false);
+      setView('public');
+      setProjectSlug('');
+      setPage('overview');
+      return;
+    }
+
+    setPublicPage('');
     if (window.location.pathname === '/health') {
       setIsPublicHealth(true);
       setView('select');
@@ -17,6 +37,7 @@ export default function useConsoleRouteState() {
       setPage('health');
       return;
     }
+
     setIsPublicHealth(false);
     const parts = window.location.pathname.split('/').filter(Boolean);
     if (parts[0] !== 'console') {
@@ -40,5 +61,5 @@ export default function useConsoleRouteState() {
     return () => window.removeEventListener('popstate', h);
   }, []);
 
-  return { page, view, projectSlug, go, isPublicHealth };
+  return { page, view, projectSlug, go, isPublicHealth, publicPage };
 }

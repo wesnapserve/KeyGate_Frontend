@@ -10,6 +10,8 @@ import HealthPage from './components/pages/HealthPage';
 import LoginView from './views/LoginView';
 import { useAuth } from './contexts/AuthContext';
 import { LogoIcon } from './components/parts/Logo';
+import LandingPage from '../Pages/LandingPage';
+import PolicyPage from '../Pages/PolicyPage';
 
 // ── Splash screen shown during initial boot ──
 function BootSplash() {
@@ -93,8 +95,13 @@ function ViewTransition({ view, children }) {
 
 // ── Router: renders the correct view based on route state ──
 function AppRouter({ routeState }) {
-  const { page, view, projectSlug, go, isPublicHealth } = routeState;
+  const { page, view, projectSlug, go, isPublicHealth, publicPage } = routeState;
   const { ctx } = useLethem();
+
+  if (publicPage) {
+    if (publicPage === 'landing') return <LandingPage />;
+    return <PolicyPage type={publicPage} />;
+  }
 
   if (isPublicHealth) {
     const publicCtx = { ...ctx, api: (path, opts = {}) => ctx.api(path, { ...opts, skipAuth: true, headers: {} }) };
@@ -136,7 +143,7 @@ function AppShell({ children }) {
 // ── App entry: single route state, single provider, boot splash, global shell ──
 export default function App() {
   const routeState = useConsoleRouteState();
-  const { projectSlug, page, isPublicHealth } = routeState;
+  const { projectSlug, page, isPublicHealth, publicPage } = routeState;
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [booted, setBooted] = useState(false);
   const [hasError, setHasError] = useState(null);
@@ -147,12 +154,14 @@ export default function App() {
     return <AppError error={hasError} onRetry={() => setHasError(null)} />;
   }
 
-  if (authLoading) return <BootSplash />;
+  if (authLoading && !publicPage) return <BootSplash />;
 
   return (
     <LethemProvider projectSlug={isPublicHealth ? '' : projectSlug} page={page}>
       <AppShell>
-        {!isPublicHealth && !isAuthenticated ? (
+        {publicPage ? (
+          <AppRouter routeState={routeState} />
+        ) : !isPublicHealth && !isAuthenticated ? (
           <LoginView />
         ) : isPublicHealth ? (
           <AppRouter routeState={routeState} />

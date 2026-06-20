@@ -1,20 +1,9 @@
-const KEY_PREFIX = 'kg_cache_';
-
-// TTL per endpoint (ms). Shorter = more current, longer = fewer reads.
-const TTL = {
-  '/health':        24 * 60 * 60 * 1000, // 24 hr — one health check per day
-  '/api/providers': 30 * 60 * 1000,      // 30 min — rarely changes
-  '/api/projects':  5 * 60 * 1000,       // 5 min  — changes on create/delete
-  '/api/master-keys': 2 * 60 * 1000,     // 2 min  — changes on create/revoke
-  '/api/subkeys':   2 * 60 * 1000,       // 2 min  — changes on create/revoke
-  '/api/analytics': 30 * 1000,           // 30 sec — changes every request
-  '/api/billing/plans': 10 * 60 * 1000, // 10 min — cache plan details; mutations bust status
-};
-
-const DEFAULT_TTL = 60 * 1000; // 1 min fallback
+const KEY_PREFIX = 'lethem_cache_';
+const LEGACY_PREFIX = 'kg_cache_';
+const MAX_CACHE_AGE = 24 * 60 * 60 * 1000;
 
 function currentScope() {
-  if (typeof window !== 'undefined' && window.__KEYGATE_CACHE_SCOPE) return window.__KEYGATE_CACHE_SCOPE;
+  if (typeof window !== 'undefined' && window.__LETHEM_CACHE_SCOPE) return window.__LETHEM_CACHE_SCOPE;
   return 'public';
 }
 
@@ -26,20 +15,42 @@ function cacheKey(path, scope) {
   return `${KEY_PREFIX}${safeScope(scope)}:${path}`;
 }
 
-function ttlFor(path) {
-  for (const [prefix, ms] of Object.entries(TTL)) {
-    if (path.startsWith(prefix)) return ms;
+function isCacheKey(key) {
+  return Boolean(key && (key.startsWith(KEY_PREFIX) || key.startsWith(LEGACY_PREFIX)));
+}
+
+function eachCacheKey(callback) {
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (isCacheKey(key)) keys.push(key);
   }
-  return DEFAULT_TTL;
+  keys.forEach(callback);
+}
+
+export function cachePruneExpired() {
+  try {
+    eachCacheKey((key) => {
+      try {
+        const entry = JSON.parse(localStorage.getItem(key) || 'null');
+        if (!entry?.ts || Date.now() - entry.ts > MAX_CACHE_AGE) localStorage.removeItem(key);
+      } catch {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch {
+    // localStorage unavailable — silently skip
+  }
 }
 
 export function cacheGet(path, scope) {
   try {
-    const raw = localStorage.getItem(cacheKey(path, scope));
+    const key = cacheKey(path, scope);
+    const raw = localStorage.getItem(key);
     if (!raw) return null;
     const entry = JSON.parse(raw);
-    if (Date.now() - entry.ts > entry.ttl) {
-      localStorage.removeItem(cacheKey(path, scope));
+    if (!entry?.ts || Date.now() - entry.ts > MAX_CACHE_AGE) {
+      localStorage.removeItem(key);
       return null;
     }
     return entry.data;
@@ -50,7 +61,8 @@ export function cacheGet(path, scope) {
 
 export function cacheSet(path, data, scope) {
   try {
-    const entry = { data, ts: Date.now(), ttl: ttlFor(path) };
+    cachePruneExpired();
+    const entry = { data, ts: Date.now(), ttl: MAX_CACHE_AGE };
     localStorage.setItem(cacheKey(path, scope), JSON.stringify(entry));
   } catch {
     // localStorage full or unavailable — silently skip
@@ -61,35 +73,51 @@ export function cacheSet(path, data, scope) {
 export function cacheBust(pathOrPrefix, scope) {
   try {
     const prefix = cacheKey(pathOrPrefix, scope);
-    const toRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith(KEY_PREFIX) && k.startsWith(prefix)) {
-        toRemove.push(k);
-      }
-    }
-    toRemove.forEach((k) => localStorage.removeItem(k));
+    eachCacheKey((key) => {
+      if (key.startsWith(prefix)) localStorage.removeItem(key);
+    });
   } catch {
     // silently skip
   }
 }
 
-/** Bust all kg_cache_ entries — call on logout, login, or hard reset. */
+export function cacheBustScope(scope) {
+  try {
+    const scopedPrefix = `${KEY_PREFIX}${safeScope(scope)}:`;
+    eachCacheKey((key) => {
+      if (key.startsWith(scopedPrefix) || key.startsWith(LEGACY_PREFIX)) localStorage.removeItem(key);
+    });
+  } catch {
+    // silently skip
+  }
+}
+
+export function cacheBustAfterMutation(path, scope) {
+  cacheBust(path, scope);
+  const segments = path.split('/').filter(Boolean);
+  while (segments.length > 1) {
+    segments.pop();
+    cacheBust('/' + segments.join('/'), scope);
+  }
+  if (path.startsWith('/api/subkeys') || path.startsWith('/api/master-keys') || path.startsWith('/api/projects') || path.startsWith('/v1/')) {
+    cacheBust('/api/analytics', scope);
+    cacheBust('/api/subkeys', scope);
+    cacheBust('/api/projects', scope);
+  }
+  if (path.startsWith('/api/billing')) cacheBust('/api/billing', scope);
+}
+
+/** Bust all Lethem cache entries — call on logout, login, or hard reset. */
 export function cacheClearAll() {
   try {
-    const toRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith(KEY_PREFIX)) toRemove.push(k);
-    }
-    toRemove.forEach((k) => localStorage.removeItem(k));
+    eachCacheKey((key) => localStorage.removeItem(key));
   } catch {
     // silently skip
   }
 }
 
-// ── Console helpers: callable from browser dev tools ──
 if (typeof window !== 'undefined') {
+  cachePruneExpired();
   window.cacheClearAll = cacheClearAll;
   window.cacheBust = cacheBust;
   window.cacheGet = cacheGet;
@@ -97,5 +125,5 @@ if (typeof window !== 'undefined') {
 }
 
 export function setCacheScope(scope) {
-  if (typeof window !== 'undefined') window.__KEYGATE_CACHE_SCOPE = safeScope(scope || 'public');
+  if (typeof window !== 'undefined') window.__LETHEM_CACHE_SCOPE = safeScope(scope || 'public');
 }
