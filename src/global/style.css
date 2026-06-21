@@ -2353,3 +2353,31 @@ kbd{
   .app-shell-header .app-shell-logo{display:none;}
   .user-menu-panel{top:52px!important;right:12px!important;}
 }
+
+/* Body-level user menu overlay: rendered through a portal so sticky headers/pages cannot clip it. */
+.user-menu-panel-overlay,
+.user-menu-panel-overlay.open{
+  position:fixed!important;
+  display:flex!important;
+  flex-direction:column;
+  gap:4px;
+  min-width:240px;
+  max-width:min(320px,calc(100vw - 24px));
+  max-height:calc(100dvh - 24px);
+  overflow-y:auto;
+  z-index:2147483647!important;
+  transform:translateZ(0);
+  pointer-events:auto;
+}
+.user-menu-panel-overlay::before{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  border-radius:inherit;
+  pointer-events:none;
+  box-shadow:0 0 0 1px rgba(124,107,255,.18),0 24px 70px rgba(0,0,0,.44);
+}
+.user-menu-trigger[aria-expanded='true']{
+  border-color:rgba(124,107,255,.55);
+  background:rgba(124,107,255,.12);
+}
