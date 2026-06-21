@@ -7,8 +7,13 @@ export default function ProjectSelectView({ go }) {
     projectToDelete, setProjectToDelete,
     deleteConfirm, setDeleteConfirm, deleteProject,
     notif, notify,
-    ctx: { fmtDate },
+    ctx: { fmtDate, billing },
   } = useLethem();
+
+  const currentPlan = billing?.plans?.find((plan) => plan.id === billing.currentPlan) || billing?.plans?.find((plan) => plan.id === 'free');
+  const projectLimit = currentPlan?.limits?.projects ?? 3;
+  const projectLimitLabel = projectLimit == null ? 'Unlimited' : projectLimit;
+  const isAtProjectLimit = projectLimit != null && projects.length >= projectLimit;
 
   const expectedDeleteText = projectToDelete ? `delete ${projectToDelete.slug}` : '';
   const canDeleteProject = projectToDelete && deleteConfirm.trim() === expectedDeleteText;
@@ -32,10 +37,10 @@ export default function ProjectSelectView({ go }) {
         </div>
         <div className='console-top-bar'>
           <div className='console-plan-badge'>
-            <span className='console-plan-dot' /> Free plan <span>{projects.length} / 3 projects</span>
+            <span className='console-plan-dot' /> {currentPlan?.name || 'Free'} plan <span>{projects.length} / {projectLimitLabel} projects</span>
           </div>
           <button className='btn btn-ghost console-create-btn' onClick={() => go('/console/subscription')}>Manage subscription</button>
-          <button className='btn btn-primary console-create-btn' disabled={projects.length >= 3} onClick={() => go('/console/new')}>+ New project</button>
+          <button className='btn btn-primary console-create-btn' disabled={isAtProjectLimit} onClick={() => go('/console/new')}>+ New project</button>
         </div>
       </header>
 
@@ -50,12 +55,12 @@ export default function ProjectSelectView({ go }) {
         </div>
 
         <div className={`card projects-banner console-info-banner ${showPlanBanner ? '' : 'hidden'}`}>
-          <div className='console-banner-text'>Your Free plan includes up to 3 projects and limited resources.</div>
+          <div className='console-banner-text'>Your {currentPlan?.name || 'Free'} plan includes {projectLimitLabel} projects and plan-based resources.</div>
           <button className='btn btn-ghost btn-sm console-banner-link' style={{ marginTop: 8 }} onClick={() => go('/console/subscription')}>Upgrade to Pro</button>
           <button className='banner-close' onClick={() => setShowPlanBanner(false)} aria-label='Close banner'>✕</button>
         </div>
 
-        <div className='console-project-count'>Total: <strong>{projects.length} / 3</strong> projects</div>
+        <div className='console-project-count'>Total: <strong>{projects.length} / {projectLimitLabel}</strong> projects</div>
 
         <div className='projects-grid console-projects-grid'>
           {filteredProjects.map((p) => (

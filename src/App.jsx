@@ -52,9 +52,8 @@ function BootLoader({ go, view, projectSlug, onBootComplete }) {
     setBootFailed(null);
 
     loadProviders().catch(() => {});
-    loadBilling?.().catch(() => {});
-    loadProjects()
-      .then((list) => {
+    Promise.all([loadProjects(), loadBilling?.().catch(() => null)])
+      .then(([list, billing]) => {
         if (cancelled) return;
         if (!list.length) {
           if (view !== 'create' && view !== 'account') go('/console/new');
@@ -62,7 +61,9 @@ function BootLoader({ go, view, projectSlug, onBootComplete }) {
           return;
         }
         if (window.location.pathname === '/') { go('/console'); onBootComplete?.(); return; }
-        if (view === 'create' && list.length >= 3) { go('/console'); onBootComplete?.(); return; }
+        const currentPlan = billing?.plans?.find((plan) => plan.id === billing.currentPlan);
+        const projectLimit = currentPlan?.limits?.projects ?? 3;
+        if (view === 'create' && projectLimit != null && list.length >= projectLimit) { go('/console'); onBootComplete?.(); return; }
         if (view === 'account') { onBootComplete?.(); return; }
         if (projectSlug && !list.find((p) => p.slug === projectSlug || p.id === projectSlug)) {
           notify('Project not found', 'error');
