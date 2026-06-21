@@ -8,6 +8,11 @@ export default function useConsoleRouteState() {
   const [publicPage, setPublicPage] = useState('');
   const accountPages = new Set(['subscription', 'billing', 'profile', 'workspace', 'docs']);
 
+  const rememberReturnPath = () => {
+    const path = `${window.location.pathname}${window.location.search || ''}`;
+    try { sessionStorage.setItem('lethem_last_console_path', path); } catch (_) {}
+  };
+
   const parsePath = () => {
     const params = new URLSearchParams(window.location.search);
     if (params.has('code') && params.has('state')) return;
@@ -44,9 +49,10 @@ export default function useConsoleRouteState() {
       window.history.pushState({}, '', '/console');
       return parsePath();
     }
-    if (!parts[1]) { setView('select'); setProjectSlug(''); setPage('overview'); return; }
-    if (parts[1] === 'new') { setView('create'); setProjectSlug(''); setPage('overview'); return; }
+    if (!parts[1]) { rememberReturnPath(); setView('select'); setProjectSlug(''); setPage('overview'); return; }
+    if (parts[1] === 'new') { rememberReturnPath(); setView('create'); setProjectSlug(''); setPage('overview'); return; }
     if (accountPages.has(parts[1])) { setView('account'); setProjectSlug(''); setPage(parts[1]); return; }
+    rememberReturnPath();
     setView('console');
     setProjectSlug(parts[1]);
     setPage(parts[2] || 'overview');

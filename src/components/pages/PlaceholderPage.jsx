@@ -90,10 +90,11 @@ const pageCopy = {
   },
 };
 
-export default function PlaceholderPage({ type = 'general' }) {
+export default function PlaceholderPage({ type = 'general', onBack = null }) {
   const data = pageCopy[type] || pageCopy.general;
   return (
     <section className='page active'>
+      {onBack && <button className='btn btn-ghost btn-sm account-back-btn' onClick={onBack}>← Back to previous page</button>}
       <div className='page-header'>
         <h1 className='page-title'>{data.title}</h1>
         <p className='page-sub'>{data.sub}</p>

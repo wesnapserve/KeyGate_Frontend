@@ -36,6 +36,15 @@ export default function ConsoleShell({ go, page, projectSlug, accountMode = fals
   const accountProject = selectedProject || { name: 'Account', slug: 'user subscription' };
 
   const navigate = (p) => accountMode ? go(`/console/${p}`) : go(`/console/${projectSlug}/${p}`);
+  const getAccountBackPath = () => {
+    const fromState = window.history.state?.from;
+    let fromStored = '';
+    try { fromStored = sessionStorage.getItem('lethem_last_console_path') || ''; } catch (_) {}
+    const fallback = selectedProject?.slug ? `/console/${selectedProject.slug}/overview` : '/console';
+    const target = fromState || fromStored || fallback;
+    return /^\/console(\/|$)/.test(target) && !/^\/console\/(subscription|billing|profile|workspace|docs)(\/|$)/.test(target) ? target : fallback;
+  };
+  const goAccountBack = () => go(getAccountBackPath());
   const PageComponent = PAGES[page];
 
   return (
@@ -61,13 +70,13 @@ export default function ConsoleShell({ go, page, projectSlug, accountMode = fals
         <main className='main'>
           <div key={page} className='page-transition'>
             {PLACEHOLDER_PAGES.has(page) ? (
-              <PlaceholderPage type={page} />
+              <PlaceholderPage type={page} onBack={accountMode ? goAccountBack : null} />
             ) : PageComponent && (
               page === 'overview'
                 ? <OverviewPage navigate={navigate} ctx={ctx} />
                 : page === 'usage' ? <UsagePage ctx={{ ...ctx, projects }} billing={ctx.billing} />
                 : page === 'danger' ? <DangerPage ctx={ctx} selectedProject={selectedProject} deleteProject={deleteProject} setProjectToDelete={setProjectToDelete} />
-                : <PageComponent ctx={ctx} />
+                : <PageComponent ctx={ctx} onBack={accountMode ? goAccountBack : null} />
             )}
           </div>
         </main>

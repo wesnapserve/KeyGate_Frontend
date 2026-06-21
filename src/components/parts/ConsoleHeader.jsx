@@ -14,7 +14,14 @@ export default function ConsoleHeader({ page, selectedProject, projectSlug, onSw
   const go = (target) => navigate?.(target);
   const goAccount = (target) => {
     setUserMenuOpen(false);
-    window.history.pushState({}, '', `/console/${target}`);
+    const currentPath = `${window.location.pathname}${window.location.search || ''}`;
+    const accountPath = /^\/console\/(subscription|billing|profile|workspace|docs)(\/|$)/.test(currentPath);
+    let from = accountPath ? '' : currentPath;
+    try {
+      if (from) sessionStorage.setItem('lethem_last_console_path', from);
+      else from = sessionStorage.getItem('lethem_last_console_path') || '';
+    } catch (_) {}
+    window.history.pushState({ from }, '', `/console/${target}`);
     window.dispatchEvent(new Event('popstate'));
   };
   const userLabel = user?.email || user?.name || 'Signed in';

@@ -29,7 +29,7 @@ const writeStoredSubscriptionDetails = (data) => {
   } catch (_) {}
 };
 
-export default function BillingPage({ ctx }) {
+export default function BillingPage({ ctx, onBack }) {
   const { api, notify, loadBilling, setBilling: setCtxBilling } = ctx;
   const [billing, setBilling] = useState(null);
   const [storedDetails, setStoredDetails] = useState(readStoredSubscriptionDetails());
@@ -84,7 +84,7 @@ export default function BillingPage({ ctx }) {
 
   return (
     <div className='billing-page account-billing-page'>
-      <button className='btn btn-ghost btn-sm billing-back' onClick={() => { window.history.pushState({}, '', '/console'); window.dispatchEvent(new Event('popstate')); }}>← Back to console</button>
+      {onBack && <button className='btn btn-ghost btn-sm billing-back' onClick={onBack}>← Back to previous page</button>}
       <div className='page-head billing-hero'>
         <div>
           <span className='eyebrow'>Account subscription</span>
